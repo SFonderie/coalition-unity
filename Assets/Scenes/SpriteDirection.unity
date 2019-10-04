@@ -229,8 +229,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 123103fee6aa4dc44afc4f8c91f5c068, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 10
-  height: 10
+  width: 20
+  height: 20
   primary: {fileID: 21300000, guid: ad0c90038ad78304fbd432d0e2b05ca2, type: 3}
   secondary: {fileID: 21300000, guid: f3dd926bc8c8e674ba2a804b19ec7731, type: 3}
 --- !u!4 &388430717
@@ -519,7 +519,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 2
-  attachCamera: 1
   playerObj: {fileID: 195758510}
   images:
   - {fileID: 21300000, guid: 8b5e1924f7a67b3469bceb686b75e11b, type: 3}

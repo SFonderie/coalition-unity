@@ -6,10 +6,7 @@ public class CharControl : MonoBehaviour {
 
     [SerializeField]
     float moveSpeed = 2.5f;
-
-    [SerializeField]
-    bool attachCamera = true;
-
+    
     [SerializeField]
     GameObject playerObj;
 
@@ -18,7 +15,10 @@ public class CharControl : MonoBehaviour {
 
     SpriteRenderer playerSprite;
     Vector3 moveHere;
+    Vector2 isoCoords;
     float inputX, inputY, dX, dY;
+    
+    Vector2 tileExtents = new Vector2(0.5f, 0.25f);
 
 	// Use this for initialization
 	void Start () {
@@ -34,6 +34,11 @@ public class CharControl : MonoBehaviour {
             Move();
         }
 	}
+
+    void OnGUI ()
+    {
+        Debug.Log("(isoX, isoY) = " + isoCoords);
+    }
 
     float AngleToOther(float x, float y)
     {
@@ -111,13 +116,14 @@ public class CharControl : MonoBehaviour {
 
         playerSprite.sprite = images[GetSpriteIndex(AngleToOther(inputX, inputY))];
 
-        if (attachCamera)
-        {
-            transform.position += moveHere;
-        }
-        else
-        {
-            playerObj.transform.position += moveHere;
-        }
+        isoCoords = SpaceToIso(transform.position.x, transform.position.y);
+
+        transform.position += moveHere;
+    }
+
+    Vector2 SpaceToIso(float x, float y)
+    {
+        Vector2 result = new Vector2(Mathf.RoundToInt((y / tileExtents.y - x / tileExtents.x) * 0.5f), Mathf.RoundToInt((x / tileExtents.x + y / tileExtents.y) * 0.5f));
+        return result;
     }
 }
