@@ -6,38 +6,103 @@ public class CharControl : MonoBehaviour {
 
     [SerializeField]
     float moveSpeed = 2.5f;
-    
-    [SerializeField]
-    GameObject playerObj;
 
     [SerializeField]
     Sprite[] images;
 
+    [SerializeField]
+    Vector2 tileHalfSize = new Vector2(0.5f, 0.25f);
+
+    bool canMove = true, canTurn = true, inputSnap = false;
     SpriteRenderer playerSprite;
-    Vector3 moveHere;
-    Vector2 isoCoords;
-    float inputX, inputY, dX, dY;
-    
-    Vector2 tileExtents = new Vector2(0.5f, 0.25f);
+    Rigidbody2D playerHandle;
+    Vector2 moveHere, isoCoords, closeCoords;
+    float inputX = 0, inputY = 0,dX, dY;
+
+    public void AllowMove(bool allow)
+    {
+        canMove = allow;
+    }
+
+    public bool CanMove()
+    {
+        return canMove;
+    }
+
+    public void AllowTurn(bool allow)
+    {
+        canTurn = allow;
+    }
+
+    public bool CanTurn()
+    {
+        return canTurn;
+    }
 
 	// Use this for initialization
-	void Start () {
-        playerSprite = playerObj.GetComponent(typeof(SpriteRenderer)) as SpriteRenderer;
-        inputX = 0;
-        inputY = 0;
+	void Start()
+    {
+        playerSprite = GetComponent(typeof(SpriteRenderer)) as SpriteRenderer;
+        playerHandle = GetComponent(typeof(Rigidbody2D)) as Rigidbody2D;
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		if (Input.anyKey)
+	void Update()
+    {
+		
+	}
+
+    // Like Update but for physics-related stuff
+    void FixedUpdate()
+    {
+        if (Input.anyKey)
         {
             Move();
         }
-	}
+    }
 
-    void OnGUI ()
+    void OnGUI()
     {
-        Debug.Log("(isoX, isoY) = " + isoCoords);
+        Debug.Log("(x, y) = " + closeCoords.ToString("f2") + "    (isoX, isoY) = " + isoCoords.ToString("f0"));
+    }
+
+    void Move()
+    {
+        inputX = Input.GetAxis("Horizontal");
+        inputY = Input.GetAxis("Vertical");
+        inputSnap = Input.GetButtonDown("Jump");
+
+        isoCoords = CartToIso(transform.position.x, transform.position.y);
+        closeCoords = IsoToCart(isoCoords.x, isoCoords.y);
+
+        if (inputSnap)
+        {
+            if (CanMove())
+            {
+                moveHere = new Vector2(closeCoords.x, closeCoords.y);
+                transform.position = (Vector3) moveHere;
+                AllowMove(false);
+            }
+            else
+            {
+                AllowMove(true);
+            }
+        }
+
+        if (inputX != 0 || inputY != 0)
+        {
+            if (canMove)
+            {
+                moveHere = new Vector2(inputX, inputY * 0.5f);
+                moveHere = moveHere.normalized * moveSpeed * Time.fixedDeltaTime;  //  fixedDeltaTime is like deltaTime but for FixedUpdate()
+                playerHandle.MovePosition(playerHandle.position + moveHere);
+            }
+
+            if (canTurn)
+            {
+                playerSprite.sprite = images[GetSpriteIndex(AngleToOther(inputX, inputY))];
+            }
+        }
     }
 
     float AngleToOther(float x, float y)
@@ -106,24 +171,13 @@ public class CharControl : MonoBehaviour {
         return result;
     }
 
-    void Move()
+    Vector2 CartToIso(float x, float y)
     {
-        inputX = Input.GetAxis("Horizontal");
-        inputY = Input.GetAxis("Vertical");
-
-        moveHere = new Vector3(inputX, inputY * 0.5f, 0);
-        moveHere = moveHere.normalized * moveSpeed * Time.deltaTime;
-
-        playerSprite.sprite = images[GetSpriteIndex(AngleToOther(inputX, inputY))];
-
-        isoCoords = SpaceToIso(transform.position.x, transform.position.y);
-
-        transform.position += moveHere;
+        return new Vector2(Mathf.RoundToInt((y / tileHalfSize.y - x / tileHalfSize.x) * 0.5f), Mathf.RoundToInt((x / tileHalfSize.x + y / tileHalfSize.y) * 0.5f));
     }
 
-    Vector2 SpaceToIso(float x, float y)
+    Vector2 IsoToCart(float x, float y)
     {
-        Vector2 result = new Vector2(Mathf.RoundToInt((y / tileExtents.y - x / tileExtents.x) * 0.5f), Mathf.RoundToInt((x / tileExtents.x + y / tileExtents.y) * 0.5f));
-        return result;
+        return new Vector2(tileHalfSize.x * ((-1 * x) + y), tileHalfSize.y * (x + y));
     }
 }
