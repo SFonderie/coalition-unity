@@ -5,14 +5,12 @@ using UnityEngine;
 public class CameraFollow : MonoBehaviour
 {
     [SerializeField]
-    Transform target;
-
-    [SerializeField]
     Vector3 offset = new Vector3(0, 0, -10f);
 
     [SerializeField]
     float smoothFactor = 0.25f;
 
+    Transform target;
     Vector3 velocity = Vector3.zero;
 
     public void SetTarget(Transform newTarget)

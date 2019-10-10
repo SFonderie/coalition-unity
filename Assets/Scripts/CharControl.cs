@@ -5,19 +5,48 @@ using UnityEngine;
 public class CharControl : MonoBehaviour {
 
     [SerializeField]
-    float moveSpeed = 2.5f;
+    GameObject[] players;
 
     [SerializeField]
-    Sprite[] images;
+    float moveSpeed = 2f;
 
     [SerializeField]
     Vector2 tileHalfSize = new Vector2(0.5f, 0.25f);
 
-    bool canMove = true, canTurn = true, inputSnap = false;
-    SpriteRenderer playerSprite;
+    int playerIndex = 0;
+    GameObject playerObj;
+    SpriteControl playerSprite;
     Rigidbody2D playerHandle;
+    bool canMove = true;
     Vector2 moveHere, isoCoords, closeCoords;
-    float inputX = 0, inputY = 0,dX, dY;
+
+    public void SetPlayer(GameObject player)
+    {
+        //Debug.Log("Selecting player at index " + playerIndex);
+
+        if (player != null)
+        {
+            if (!IsPlayerNull())
+            {
+                //  snap old player to nearest iso
+                IsoSnap(false);
+                //  make old player immovable
+                playerHandle.constraints = RigidbodyConstraints2D.FreezeAll;
+            }
+
+            // get new player
+            playerObj = player;
+            playerSprite = playerObj.GetComponent(typeof(SpriteControl)) as SpriteControl;
+            playerHandle = playerObj.GetComponent(typeof(Rigidbody2D)) as Rigidbody2D;
+            //  make new player movable
+            playerHandle.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+            isoCoords = CartToIso(playerObj.transform.position.x, playerObj.transform.position.y);
+            closeCoords = IsoToCart(isoCoords.x, isoCoords.y);
+
+            (Camera.main.GetComponent(typeof(CameraFollow)) as CameraFollow).SetTarget(playerObj.transform);
+        }
+    }
 
     public void AllowMove(bool allow)
     {
@@ -29,146 +58,99 @@ public class CharControl : MonoBehaviour {
         return canMove;
     }
 
-    public void AllowTurn(bool allow)
+    public bool IsPlayerNull()
     {
-        canTurn = allow;
-    }
-
-    public bool CanTurn()
-    {
-        return canTurn;
+        return (playerObj == null || playerSprite == null || playerHandle == null);
     }
 
 	// Use this for initialization
 	void Start()
     {
-        playerSprite = GetComponent(typeof(SpriteRenderer)) as SpriteRenderer;
-        playerHandle = GetComponent(typeof(Rigidbody2D)) as Rigidbody2D;
-	}
+        SetPlayer(players[playerIndex]);
+    }
 	
 	// Update is called once per frame
 	void Update()
     {
-		
-	}
+        if (Input.GetButtonDown("SwapCharacter"))
+        {
+            NextPlayer();
+        }
+
+        if (Input.GetButtonDown("SnapToIso"))
+        {
+            IsoSnap();
+        }
+    }
 
     // Like Update but for physics-related stuff
     void FixedUpdate()
     {
-        if (Input.anyKey)
+        if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
         {
-            Move();
+            Move(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         }
     }
 
     void OnGUI()
     {
-        Debug.Log("(x, y) = " + closeCoords.ToString("f2") + "    (isoX, isoY) = " + isoCoords.ToString("f0"));
+        //Debug.Log("(x, y) = " + closeCoords.ToString("f2") + "    (isoX, isoY) = " + isoCoords.ToString("f0"));
     }
 
-    void Move()
+    void NextPlayer()
     {
-        inputX = Input.GetAxis("Horizontal");
-        inputY = Input.GetAxis("Vertical");
-        inputSnap = Input.GetButtonDown("Jump");
+        int startIndex = playerIndex;
+        ++playerIndex;
 
-        isoCoords = CartToIso(transform.position.x, transform.position.y);
-        closeCoords = IsoToCart(isoCoords.x, isoCoords.y);
-
-        if (inputSnap)
+        //  go through the array once looking for valid players
+        while (playerIndex != startIndex)
         {
-            if (CanMove())
+            //  look at the next player in the array
+            if (playerIndex >= players.Length)
             {
-                moveHere = new Vector2(closeCoords.x, closeCoords.y);
-                transform.position = (Vector3) moveHere;
-                AllowMove(false);
+                playerIndex = 0;
             }
             else
             {
-                AllowMove(true);
-            }
-        }
-
-        if (inputX != 0 || inputY != 0)
-        {
-            if (canMove)
-            {
-                moveHere = new Vector2(inputX, inputY * 0.5f);
-                moveHere = moveHere.normalized * moveSpeed * Time.fixedDeltaTime;  //  fixedDeltaTime is like deltaTime but for FixedUpdate()
-                playerHandle.MovePosition(playerHandle.position + moveHere);
+                ++playerIndex;
             }
 
-            if (canTurn)
+            //  if they're not null, switch to them
+            if (players[playerIndex] != null)
             {
-                playerSprite.sprite = images[GetSpriteIndex(AngleToOther(inputX, inputY))];
+                SetPlayer(players[playerIndex]);
+                break;
             }
         }
     }
 
-    float AngleToOther(float x, float y)
+    void IsoSnap(bool freeze = true)
     {
-        dX = x/* - transform.position.x*/;
-        dY = y/* - transform.position.y*/;
+        isoCoords = CartToIso(playerObj.transform.position.x, playerObj.transform.position.y);
+        closeCoords = IsoToCart(isoCoords.x, isoCoords.y);
 
-        if (dX < 0)
+        moveHere = new Vector2(closeCoords.x, closeCoords.y);
+        playerObj.transform.position = (Vector3) moveHere;
+
+        if (freeze)
         {
-            if (dY < 0) //quadrant 3
-            {
-                return 180 + ((Mathf.Atan2(-1 * dX, -1 * dY)) * Mathf.Rad2Deg);
-            }
-            else if (dY == 0) //left
-            {
-                return 180;
-            }
-            else if (dY > 0) //quadrant 2
-            {
-                return 180 - ((Mathf.Atan2(-1 * dX, dY)) * Mathf.Rad2Deg);
-            }
+            AllowMove(!canMove);
         }
-        else if (dX == 0)
-        {
-            if (dY < 0) //down
-            {
-                return 270;
-            }
-            else if (dY > 0) //up
-            {
-                return 90;
-            }
-        }
-        else if (dX > 0)
-        {
-            if (dY < 0) //quadrant 4
-            {
-                return 360 - ((Mathf.Atan2(dX, -1 * dY)) * Mathf.Rad2Deg);
-            }
-            else if (dY == 0) //right
-            {
-                return 0;
-            }
-            else if (dY > 0) //quadrant 1
-            {
-                return (Mathf.Atan2(dX, dY)) * Mathf.Rad2Deg;
-            }
-        }
-        return 0;
     }
 
-    int GetSpriteIndex(float degrees)
+    void Move(float x, float y)
     {
-        int result = Mathf.RoundToInt(degrees / 45f);
+        isoCoords = CartToIso(playerObj.transform.position.x, playerObj.transform.position.y);
+        closeCoords = IsoToCart(isoCoords.x, isoCoords.y);
 
-        while (result < 0)
+        if (canMove)
         {
-            result += 8;
+            moveHere = new Vector2(x, y * 0.5f);
+            moveHere = moveHere.normalized * moveSpeed * Time.fixedDeltaTime;  //  fixedDeltaTime is like deltaTime but for FixedUpdate()
+            playerHandle.MovePosition(playerHandle.position + moveHere);
         }
 
-        while (result > 7)
-        {
-            result -= 8;
-        }
-
-        return result;
+        playerSprite.TurnToward(x, y);
     }
 
     Vector2 CartToIso(float x, float y)
