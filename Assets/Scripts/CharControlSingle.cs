@@ -5,18 +5,31 @@ using UnityEngine;
 public class CharControlSingle : MonoBehaviour
 {
     [SerializeField]
+    int faction = 0;
+
+    [SerializeField]
     float moveSpeed = 2f;
 
     [SerializeField]
+    int startFacingAngle = 0;
+
+#pragma warning disable CS0649
+    [SerializeField]
     Sprite[] images;
+#pragma warning restore CS0649
 
     [SerializeField]
     Vector2 tileHalfSize = new Vector2(0.5f, 0.25f);
-
-    bool active = false;
+    
     bool canTurn = true;
-    SpriteRenderer playerSprite;
+    SpriteRenderer playerSprite, haloSprite;
     Vector2 moveHere, isoCoords, closeCoords;
+    Color[] colorNeutral = new Color[] { new Color(0.5f, 0.5f, 0.5f), new Color(1, 1, 1) }, colorAlly = new Color[] { new Color(0, 0.5f, 0), new Color(0, 1, 0) }, colorEnemy = new Color[] { new Color(0.5f, 0, 0), new Color(1, 0, 0) };
+
+    public int GetFaction()
+    {
+        return faction;
+    }
 
     public void AllowTurn(bool allow)
     {
@@ -65,10 +78,34 @@ public class CharControlSingle : MonoBehaviour
         TurnToward(x, y);
     }
 
+    public void SetHaloActive(bool active)
+    {
+        switch (faction)
+        {
+            case 0:
+                haloSprite.color = colorNeutral[System.Convert.ToInt32(active)];
+                break;
+            case 1:
+                haloSprite.color = colorAlly[System.Convert.ToInt32(active)];
+                break;
+            case 2:
+                haloSprite.color = colorEnemy[System.Convert.ToInt32(active)];
+                break;
+            default:
+                break;
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        playerSprite = GetComponent(typeof(SpriteRenderer)) as SpriteRenderer;
+        playerSprite = GetComponent<SpriteRenderer>();
+        if (transform.Find("Halo") != null)
+        {
+            haloSprite = transform.Find("Halo").GetComponent<SpriteRenderer>();
+        }
+
+        playerSprite.sprite = images[GetSpriteIndex(startFacingAngle)];
 
         UpdateSpecialCoords(ref isoCoords, ref closeCoords);
     }
