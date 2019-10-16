@@ -3,225 +3,280 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class CharControlOverlord : MonoBehaviour {
-
-#pragma warning disable CS0649
-    [SerializeField]
-    GameObject[] players;
-
-    [SerializeField]
-    GameObject[] enemies;
-#pragma warning restore CS0649
-
-    int playerIndex = 0, combatRound = 1, combatants, activeCombatant = 0;
-    GameObject playerObj;
-    CharControlSingle playerScript;
-    Rigidbody2D playerHandle;
-    bool canMove = true;
-    GameObject[] initiativeList;
-
-    enum combatState { none, combat };
-    combatState stage = combatState.none;
-
-    IEnumerator Timer()
+namespace Coalition
+{
+    public class CharControlOverlord : MonoBehaviour
     {
-        yield return new WaitForSeconds(1);
-    }
+        #pragma warning disable CS0649
+        [SerializeField]
+        GameObject[] players;
 
-    public void AllowMove(bool allow)
-    {
-        canMove = allow;
-    }
+        [SerializeField]
+        GameObject[] enemies;
+        #pragma warning restore CS0649
 
-    public bool CanMove()
-    {
-        return canMove;
-    }
+        [SerializeField]
+        Vector2 tileHalfSize = new Vector2(0.5f, 0.25f);
 
-    public bool IsPlayerNull()
-    {
-        return (playerObj == null || playerScript == null || playerHandle == null);
-    }
-    public void SetPlayer(GameObject player)
-    {
-        if (!IsPlayerNull())
+        int playerIndex = 0, combatRound = 1, combatants, activeCombatant = 0;
+        GameObject playerObj;
+        CharControlSingle playerScript;
+        Rigidbody2D playerHandle;
+        GameObject[] initiativeList;
+        bool nonPlayerTurn = false;
+        float nonPlayerTimer = 1;
+        Vector3 mouseLocation;
+        Vector2 mouseIso, mouseClose;
+        SpriteRenderer mouseHalo;
+        Globals.MoveMode moveMode = Globals.MoveMode.free;
+        Globals.CombatState combatState = Globals.CombatState.none;
+        Globals.Faction playerFaction = Globals.Faction.neutral;
+        
+        public void SetMoveMode(Globals.MoveMode mode)
         {
-            //  snap old player to nearest iso
-            playerScript.IsoSnap();
-            //  toggle off pld player's halo
-            playerScript.SetHaloActive(false);
-            //  make old player immovable
-            playerHandle.constraints = RigidbodyConstraints2D.FreezeAll;
-        }
-
-        // get new player
-        playerObj = player;
-        playerScript = playerObj.GetComponent<CharControlSingle>();
-        playerScript.SetHaloActive(true);  //  toggle on new player's halo
-        playerHandle = playerObj.GetComponent<Rigidbody2D>();
-        playerHandle.constraints = RigidbodyConstraints2D.FreezeRotation;  //  make new player movable
-
-        Camera.main.GetComponent<CameraFollow>().SetTarget(playerObj.transform);
-    }
-
-    public void AllIsoSnap()
-    {
-        foreach (GameObject p in players)
-        {
-            if (p != null)
+            if ((int) mode >= 0 && (int) mode <= 2)
             {
-                p.GetComponent<CharControlSingle>().IsoSnap();
+                mouseHalo.enabled = ((int) mode == 1);
+                moveMode = mode;
             }
         }
 
-        foreach (GameObject e in enemies)
+        public void SetMoveMode(int mode)
         {
-            if (e != null)
+            if (mode >= 0 && mode <= 2)
             {
-                e.GetComponent<CharControlSingle>().IsoSnap();
+                mouseHalo.enabled = mode == 1;
+                moveMode = (Globals.MoveMode) mode;
             }
         }
-    }
 
-    // Use this for initialization
-    void Start()
-    {
-        SetPlayer(players[playerIndex]);
-
-        Debug.Log("backspace = swap character    enter = start combat");
-    }
-	
-	// Update is called once per frame
-	void Update()
-    {
-        switch (stage)
+        public bool CanMove()
         {
-            case combatState.none:
-                if (Input.GetButtonDown("DummyCombat"))  //  start combat round
-                {
-                    AllIsoSnap();
-                    AllowMove(false);
-                    SortInitiative();
-                    Debug.Log("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)");
-                    SetPlayer(initiativeList[activeCombatant]);
-                    stage = combatState.combat;
-                }
-                else if (Input.GetButtonDown("SwapCharacter"))  //  swap character out of combat
-                {
-                    NextPlayer();
-                }
-
-                    break;
-            case combatState.combat:
-                if (Input.GetButtonDown("DummyCombat"))  //  end combat
-                {
-                    Debug.Log("End combat: returning control to " + players[playerIndex].name);
-                    SetPlayer(players[playerIndex]);
-                    AllowMove(true);
-                    combatRound = 1;
-                    stage = combatState.none;
-                }
-                else if (Input.GetButtonDown("DummyAction"))  //  active combatant takes their turn
-                {
-                    if (activeCombatant < initiativeList.Length - 1)  //  next combatant
-                    {
-                        activeCombatant++;
-                    }
-                    else  //  next round
-                    {
-                        activeCombatant = 0;
-                        combatRound++;
-                    }
-
-                    Debug.Log("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)");
-                    SetPlayer(initiativeList[activeCombatant]);
-                }
-
-                break;
-            default:
-                break;
+            return (moveMode != Globals.MoveMode.none);
         }
 
-        /*if (Input.GetButtonDown("IsoSnap"))
+        public bool IsPlayerNull()
+        {
+            return (playerObj == null || playerScript == null || playerHandle == null);
+        }
+
+        public void SetPlayer(GameObject player)
         {
             if (!IsPlayerNull())
             {
+                //  snap old player to nearest iso
                 playerScript.IsoSnap();
-                playerScript.AllowTurn(!playerScript.CanTurn());
-                AllowMove(!canMove);
-            }
-        }*/
-
-        if ((Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0) && !IsPlayerNull())
-        {
-            if (canMove)
-            {
-                playerScript.Move(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+                //  toggle off pld player's halo
+                playerScript.SetHaloActive(false);
+                //  make old player immovable
+                playerHandle.constraints = RigidbodyConstraints2D.FreezeAll;
             }
 
-            playerScript.TurnToward(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+            // get new player
+            playerObj = player;
+            playerScript = playerObj.GetComponent<CharControlSingle>();
+            playerScript.SetHaloActive(true);  //  toggle on new player's halo
+            playerFaction = playerScript.GetFaction();  //  get the new player's faction
+            playerHandle = playerObj.GetComponent<Rigidbody2D>();
+            playerHandle.constraints = RigidbodyConstraints2D.FreezeRotation;  //  make new player movable
+
+            Camera.main.GetComponent<CameraFollow>().SetTarget(playerObj.transform);
         }
-    }
 
-    void OnGUI()
-    {
-        /*if (!IsPlayerNull())
+        public void AllIsoSnap()
         {
-            Debug.Log("(x, y) = " + playerScript.GetCloseCoords().ToString("f2") + "    (isoX, isoY) = " + playerScript.GetIsoCoords().ToString("f0"));
-        }*/
-    }
-
-    void NextPlayer()
-    {
-        int startIndex = playerIndex;
-
-        //  go through the array once looking for valid players
-        do
-        {
-            ++playerIndex;
-
-            //  look at the next player in the array
-            if (playerIndex >= players.Length)
+            foreach (GameObject p in players)
             {
-                playerIndex = 0;
+                if (p != null)
+                {
+                    p.GetComponent<CharControlSingle>().IsoSnap();
+                }
             }
 
-            //  if they're not null, switch to them
-            if (players[playerIndex] != null)
+            foreach (GameObject e in enemies)
             {
-                SetPlayer(players[playerIndex]);
-                break;
-            }
-        } while (playerIndex != startIndex);
-    }
-
-    void SortInitiative()
-    {
-        //  just a dummy function for now, no actual initiative is calculated
-        combatants = players.Count(p => p != null) + enemies.Count(e => e != null);
-        initiativeList = new GameObject[combatants];
-
-        activeCombatant = 0;
-
-        //  fill initiative list
-        foreach (GameObject p in players)
-        {
-            if (p != null)
-            {
-                initiativeList[activeCombatant] = p;
-                activeCombatant++;
+                if (e != null)
+                {
+                    e.GetComponent<CharControlSingle>().IsoSnap();
+                }
             }
         }
 
-        foreach (GameObject e in enemies)
+        // Use this for initialization
+        void Start()
         {
-            if (e != null)
+            Debug.Log("backspace = swap character    enter = start combat");
+
+            mouseHalo = GetComponent<SpriteRenderer>();
+
+            SetMoveMode(2);
+            SetPlayer(players[playerIndex]);
+        }
+        
+        // Update is called once per frame
+        void Update()
+        {
+            switch (combatState)
             {
-                initiativeList[activeCombatant] = e;
-                activeCombatant++;
+                case Globals.CombatState.none:
+                    if (Input.GetButtonDown("DummyCombat"))  //  start combat round
+                    {
+                        AllIsoSnap();
+                        SortInitiative();
+                        Debug.Log("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)");
+                        SetPlayer(initiativeList[activeCombatant]);
+                        if (playerFaction == Globals.Faction.ally)
+                        {
+                            SetMoveMode(1);
+                        }
+                        else
+                        {
+                            SetMoveMode(0);
+                        }
+                        combatState = Globals.CombatState.combat;
+                    }
+                    else if (Input.GetButtonDown("SwapCharacter"))  //  swap character out of combat
+                    {
+                        NextPlayer();
+                    }
+                    break;
+                case Globals.CombatState.combat:
+                    if (Input.GetButtonDown("DummyCombat"))  //  end combat
+                    {
+                        Debug.Log("End combat: returning control to " + players[playerIndex].name);
+                        SetPlayer(players[playerIndex]);
+                        SetMoveMode(2);
+                        combatRound = 1;
+                        combatState = Globals.CombatState.none;
+                    }
+                    else if ((Input.GetButtonDown("DummyAction") && playerFaction == Globals.Faction.ally) || nonPlayerTurn)  //  active combatant takes their turn
+                    {
+                        nonPlayerTurn = false;
+
+                        if (activeCombatant < initiativeList.Length - 1)  //  next combatant
+                        {
+                            activeCombatant++;
+                        }
+                        else  //  next round
+                        {
+                            activeCombatant = 0;
+                            combatRound++;
+                        }
+
+                        SetPlayer(initiativeList[activeCombatant]);
+
+                        if (playerFaction == Globals.Faction.ally)
+                        {
+                            Debug.Log("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)");
+                            SetMoveMode(1);
+                        }
+                        else
+                        {
+                            Debug.Log("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + " is taking their turn");
+                            SetMoveMode(0);
+                        }
+                    }
+                    
+                    if (playerFaction == Globals.Faction.enemy)  //  wait for a second to simulate enemy character's turn; remove this after actually implementing character actions
+                    {
+                        nonPlayerTimer -= Time.deltaTime;
+                        if (nonPlayerTimer <= 0)
+                        {
+                            nonPlayerTurn = true;
+                            nonPlayerTimer = 1;
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            switch (moveMode)
+            {
+                case Globals.MoveMode.none:
+                    break;
+                case Globals.MoveMode.free:
+                    if ((Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0) && !IsPlayerNull())
+                    {
+                        playerScript.Move(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+
+                        playerScript.TurnToward(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+                    }
+                    break;
+                case Globals.MoveMode.click:
+                    mouseLocation = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                    Globals.CartToNearestIso(mouseLocation.x, mouseLocation.y, ref mouseIso);
+                    Globals.IsoToCart(mouseIso.x, mouseIso.y, ref mouseClose);
+                    transform.position = (Vector3) mouseClose;
+                    playerScript.TurnToward(mouseClose.x, mouseClose.y, false);
+                    break;
+                default:
+                    break;
             }
         }
 
-        activeCombatant = 0;
+        void OnGUI()
+        {
+            /*if (!IsPlayerNull())
+            {
+                Debug.Log("(x, y) = " + playerScript.GetCloseCoords().ToString("f2") + "    (isoX, isoY) = " + playerScript.GetIsoCoords().ToString("f0"));
+            }*/
+        }
+
+        void NextPlayer()
+        {
+            int startIndex = playerIndex;
+
+            //  go through the array once looking for valid players
+            do
+            {
+                ++playerIndex;
+
+                //  look at the next player in the array
+                if (playerIndex >= players.Length)
+                {
+                    playerIndex = 0;
+                }
+
+                //  if they're not null, switch to them
+                if (players[playerIndex] != null)
+                {
+                    SetPlayer(players[playerIndex]);
+                    break;
+                }
+            } while (playerIndex != startIndex);
+        }
+
+        void SortInitiative()
+        {
+            //  just a dummy function for now, no actual initiative is calculated
+            combatants = players.Count(p => p != null) + enemies.Count(e => e != null);
+            initiativeList = new GameObject[combatants];
+
+            activeCombatant = 0;
+
+            //  fill initiative list
+            foreach (GameObject p in players)
+            {
+                if (p != null)
+                {
+                    initiativeList[activeCombatant] = p;
+                    activeCombatant++;
+                }
+            }
+
+            foreach (GameObject e in enemies)
+            {
+                if (e != null)
+                {
+                    initiativeList[activeCombatant] = e;
+                    activeCombatant++;
+                }
+            }
+
+            activeCombatant = 0;
+
+            initiativeList = initiativeList.OrderByDescending(x => x.GetComponent<CharControlSingle>().RollInitiative()).ToArray();
+        }
     }
 }
