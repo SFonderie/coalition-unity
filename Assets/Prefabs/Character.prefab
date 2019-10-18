@@ -47,7 +47,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f71490053d80db4e850b1f1a1ffecee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  faction: 0
   moveSpeed: 2
+  initiativeMod: 0
+  startFacingAngle: 0
   images:
   - {fileID: 21300000, guid: 8b5e1924f7a67b3469bceb686b75e11b, type: 3}
   - {fileID: 21300000, guid: ec2fbdf3ba07a09448f9ddf354e948e6, type: 3}
@@ -57,7 +60,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: baeefb129c4cdf74ca1d2ec90c0fc39e, type: 3}
   - {fileID: 21300000, guid: 933c73a37f003f6488ee4f7e0f6f4211, type: 3}
   - {fileID: 21300000, guid: ce0dde5adf913e7478a9819d90100df2, type: 3}
-  tileHalfSize: {x: 0.5, y: 0.25}
 --- !u!212 &7812972427325995270
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -152,7 +154,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.5, y: 0.5}
+  m_Size: {x: 0.3, y: 0.3}
   m_EdgeRadius: 0
 --- !u!1 &6137593754859028283
 GameObject:
