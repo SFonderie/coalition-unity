@@ -6,6 +6,7 @@ namespace Coalition
 {
     public static class Globals
     {
+        public static Vector2 tileSize = new Vector2(1, 0.5f);
         public static Vector2 tileHalfSize = new Vector2(0.5f, 0.25f);
         public static Vector2 tileFactor = new Vector2(2, 4);
 

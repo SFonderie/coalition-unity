@@ -7,17 +7,22 @@ namespace Coalition
 {
     public class CharControlOverlord : MonoBehaviour
     {
+        [SerializeField]
+        GUIStyle displayStyle;
+
         #pragma warning disable CS0649
+        [SerializeField]
+        float combatMoveDistance = 5f;
+
         [SerializeField]
         GameObject[] players;
 
         [SerializeField]
         GameObject[] enemies;
         #pragma warning restore CS0649
-
-        [SerializeField]
-        Vector2 tileHalfSize = new Vector2(0.5f, 0.25f);
-
+        
+        Rect displayArea = new Rect(0, 0, Screen.width, Screen.height);
+        string displayText;
         int playerIndex = 0, combatRound = 1, combatants, activeCombatant = 0;
         GameObject playerObj;
         CharControlSingle playerScript;
@@ -28,6 +33,7 @@ namespace Coalition
         Vector3 mouseLocation;
         Vector2 mouseIso, mouseClose;
         SpriteRenderer mouseHalo;
+        Color haloValidMove = Color.white, haloInvalidMove = new Color(0.75f, 0.75f, 0.75f);
         Globals.MoveMode moveMode = Globals.MoveMode.free;
         Globals.CombatState combatState = Globals.CombatState.none;
         Globals.Faction playerFaction = Globals.Faction.neutral;
@@ -105,7 +111,8 @@ namespace Coalition
         // Use this for initialization
         void Start()
         {
-            Debug.Log("backspace = swap character    enter = start combat");
+            displayText = "backspace = swap character    enter = start combat";
+            Debug.Log(displayText);
 
             mouseHalo = GetComponent<SpriteRenderer>();
 
@@ -123,7 +130,8 @@ namespace Coalition
                     {
                         AllIsoSnap();
                         SortInitiative();
-                        Debug.Log("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)");
+                        displayText = "Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)";
+                        Debug.Log(displayText);
                         SetPlayer(initiativeList[activeCombatant]);
                         if (playerFaction == Globals.Faction.ally)
                         {
@@ -143,7 +151,8 @@ namespace Coalition
                 case Globals.CombatState.combat:
                     if (Input.GetButtonDown("DummyCombat"))  //  end combat
                     {
-                        Debug.Log("End combat: returning control to " + players[playerIndex].name);
+                        displayText = "End combat: returning control to " + players[playerIndex].name;
+                        Debug.Log(displayText);
                         SetPlayer(players[playerIndex]);
                         SetMoveMode(2);
                         combatRound = 1;
@@ -167,12 +176,14 @@ namespace Coalition
 
                         if (playerFaction == Globals.Faction.ally)
                         {
-                            Debug.Log("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)");
+                            displayText = "Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)";
+                            Debug.Log(displayText);
                             SetMoveMode(1);
                         }
                         else
                         {
-                            Debug.Log("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + " is taking their turn");
+                            displayText = "Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + " is taking their turn";
+                            Debug.Log(displayText);
                             SetMoveMode(0);
                         }
                     }
@@ -209,6 +220,18 @@ namespace Coalition
                     Globals.IsoToCart(mouseIso.x, mouseIso.y, ref mouseClose);
                     transform.position = (Vector3) mouseClose;
                     playerScript.TurnToward(mouseClose.x, mouseClose.y, false);
+                    if (mouseIso != playerScript.GetIsoCoords() && Vector3.Distance(playerScript.GetIsoCoords(), mouseIso) <= combatMoveDistance)
+                    {
+                        mouseHalo.color = haloValidMove;
+                        if (Input.GetButtonDown("Fire1"))
+                        {
+                            playerScript.Move(mouseClose.x, mouseClose.y, false);
+                        }
+                    }
+                    else
+                    {
+                        mouseHalo.color = haloInvalidMove;
+                    }
                     break;
                 default:
                     break;
@@ -221,6 +244,7 @@ namespace Coalition
             {
                 Debug.Log("(x, y) = " + playerScript.GetCloseCoords().ToString("f2") + "    (isoX, isoY) = " + playerScript.GetIsoCoords().ToString("f0"));
             }*/
+            GUI.Label(displayArea, displayText, displayStyle);
         }
 
         void NextPlayer()

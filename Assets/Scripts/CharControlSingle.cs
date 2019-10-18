@@ -94,14 +94,22 @@ namespace Coalition
             transform.position = (Vector3) moveHere;
         }
 
-        public void Move(float x, float y)
+        public void Move(float x, float y, bool smooth = true)
         {
+            if (smooth)
+            {
+                moveHere = new Vector2(x, y * 0.5f);
+                moveHere = moveHere.normalized * moveSpeed * Time.deltaTime;
+                transform.position += (Vector3) moveHere;
+            }
+            else
+            {
+                moveHere = new Vector2(x, y);
+                transform.position = (Vector3) moveHere;
+            }
+
             Globals.CartToNearestIso(transform.position.x, transform.position.y, ref isoCoords);
             Globals.IsoToCart(isoCoords.x, isoCoords.y, ref closeCoords);
-
-            moveHere = new Vector2(x, y * 0.5f);
-            moveHere = moveHere.normalized * moveSpeed * Time.deltaTime;
-            transform.position += (Vector3) moveHere;
 
             TurnToward(x, y);
         }
