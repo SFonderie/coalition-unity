@@ -10,16 +10,15 @@ namespace Coalition
     {
         #pragma warning disable CS0649
         [SerializeField]
-        GameObject tilemapGrid;
-
+        Color movementHaloValidColor = Color.white;
+        [SerializeField]
+        Color movementHaloInvalidColor = new Color(0.625f, 0.625f, 0.625f);
         [SerializeField]
         GUIStyle displayStyle;
         [SerializeField]
         float combatMoveDistance = 5f;
-
         [SerializeField]
         GameObject[] players;
-
         [SerializeField]
         GameObject[] enemies;
         #pragma warning restore CS0649
@@ -37,26 +36,22 @@ namespace Coalition
         Vector3 mouseLocation;
         Vector2 mouseIso, mouseClose;
         SpriteRenderer mouseHalo;
-        Color haloValidMove = Color.white, haloInvalidMove = new Color(0.75f, 0.75f, 0.75f);
-        Globals.MoveMode moveMode = Globals.MoveMode./*free*/click;
+        Collider2D mouseHaloCollider;
+        Globals.MoveMode moveMode = Globals.MoveMode.free;
         Globals.CombatState combatState = Globals.CombatState.none;
         Globals.Faction playerFaction = Globals.Faction.neutral;
         
         public void SetMoveMode(Globals.MoveMode mode)
         {
-            if ((int) mode >= 0 && (int) mode <= 2)
-            {
-                mouseHalo.enabled = ((int) mode == 1);
-                moveMode = mode;
-            }
+            mouseHalo.enabled = (mode == Globals.MoveMode.click);
+            moveMode = mode;
         }
 
         public void SetMoveMode(int mode)
         {
-            if (mode >= 0 && mode <= 2)
+            if (System.Enum.IsDefined(typeof(Globals.MoveMode), mode))
             {
-                mouseHalo.enabled = mode == 1;
-                moveMode = (Globals.MoveMode) mode;
+                SetMoveMode((Globals.MoveMode) mode);
             }
         }
 
@@ -76,7 +71,7 @@ namespace Coalition
             {
                 //  snap old player to nearest iso
                 playerScript.IsoSnap();
-                //  toggle off pld player's halo
+                //  toggle old player's halo to dim mode
                 playerScript.SetHaloActive(false);
                 //  make old player immovable
                 playerHandle.constraints = RigidbodyConstraints2D.FreezeAll;
@@ -85,7 +80,7 @@ namespace Coalition
             // get new player
             playerObj = player;
             playerScript = playerObj.GetComponent<CharControlSingle>();
-            playerScript.SetHaloActive(true);  //  toggle on new player's halo
+            playerScript.SetHaloActive(true);  //  toggle new player's halo to bright mode
             playerFaction = playerScript.GetFaction();  //  get the new player's faction
             playerHandle = playerObj.GetComponent<Rigidbody2D>();
             playerHandle.constraints = RigidbodyConstraints2D.FreezeRotation;  //  make new player movable
@@ -117,15 +112,16 @@ namespace Coalition
         {
             DebugLog("backspace = swap character    enter = start combat");
 
-            tilemaps = new Tilemap[3];
-            tilemaps[0] = tilemapGrid.transform.Find("Floor").GetComponent<Tilemap>();
-            tilemaps[1] = tilemapGrid.transform.Find("Scenery").GetComponent<Tilemap>();
-            tilemaps[2] = tilemapGrid.transform.Find("Walls").GetComponent<Tilemap>();
-
             mouseHalo = GetComponent<SpriteRenderer>();
+            mouseHaloCollider = GetComponent<Collider2D>();
 
-            SetMoveMode(Globals.MoveMode./*free*/click);
+            SetMoveMode(Globals.MoveMode.free);
             SetPlayer(players[playerIndex]);
+        }
+
+        void FixedUpdate()
+        {
+            
         }
         
         // Update is called once per frame
@@ -160,7 +156,7 @@ namespace Coalition
                     {
                         DebugLog("End combat: returning control to " + players[playerIndex].name);
                         SetPlayer(players[playerIndex]);
-                        SetMoveMode(Globals.MoveMode./*free*/click);
+                        SetMoveMode(Globals.MoveMode.free);
                         combatRound = 1;
                         combatState = Globals.CombatState.none;
                     }
@@ -219,14 +215,20 @@ namespace Coalition
                     }
                     break;
                 case Globals.MoveMode.click:
+                    //  get the world location that the mouse is pointing to
                     mouseLocation = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                     Globals.CartToNearestIso(mouseLocation.x, mouseLocation.y, ref mouseIso);
                     Globals.IsoToCart(mouseIso.x, mouseIso.y, ref mouseClose);
+                    //  place the movement halo there
                     transform.position = (Vector3) mouseClose;
+                    //  have the active character turn to look at that spot
                     playerScript.TurnToward(mouseClose.x, mouseClose.y, false);
-                    if (mouseIso != playerScript.GetIsoCoords() && Vector3.Distance(playerScript.GetIsoCoords(), mouseIso) <= combatMoveDistance && tilemaps[0].GetTile((Vector3Int) tilemaps[0].WorldToCell(mouseClose)) != null && tilemaps[1].GetTile((Vector3Int) tilemaps[1].WorldToCell(mouseClose)) == null && tilemaps[2].GetTile((Vector3Int) tilemaps[2].WorldToCell(mouseClose)) == null)
+                    //  hide the halo if there is no floor tile there
+                    mouseHalo.enabled = mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Floor"));
+                    //  set the halo brightness and actually allow movement if the spot is valid
+                    if (mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Floor")) && !mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Scenery")) && Vector2.Distance(playerScript.GetIsoCoords(), mouseIso) <= combatMoveDistance)
                     {
-                        mouseHalo.color = haloValidMove;
+                        mouseHalo.color = movementHaloValidColor;
                         if (Input.GetButtonDown("Fire1"))
                         {
                             playerScript.Move(mouseClose.x, mouseClose.y, false);
@@ -234,7 +236,7 @@ namespace Coalition
                     }
                     else
                     {
-                        mouseHalo.color = haloInvalidMove;
+                        mouseHalo.color = movementHaloInvalidColor;
                     }
                     break;
                 default:
@@ -279,7 +281,6 @@ namespace Coalition
 
         void SortInitiative()
         {
-            //  just a dummy function for now, no actual initiative is calculated
             combatants = players.Count(p => p != null) + enemies.Count(e => e != null);
             initiativeList = new GameObject[combatants];
 

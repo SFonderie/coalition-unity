@@ -190,7 +190,7 @@ PrefabInstance:
     - target: {fileID: 2523802025086375213, guid: a1ffca712eb297c44b798f83b7092795,
         type: 3}
       propertyPath: m_Color.g
-      value: 0.49803922
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2523802025086375213, guid: a1ffca712eb297c44b798f83b7092795,
         type: 3}
@@ -224,7 +224,7 @@ GameObject:
   - component: {fileID: 437731965}
   - component: {fileID: 437731964}
   - component: {fileID: 437731963}
-  m_Layer: 10
+  m_Layer: 11
   m_Name: Scenery
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -259,62 +259,62 @@ CompositeCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_GeometryType: 0
+  m_GeometryType: 1
   m_GenerationType: 0
   m_EdgeRadius: 0
   m_ColliderPaths:
   - m_Collider: {fileID: 437731965}
     m_ColliderPaths:
-    - - X: 4999844
-        Y: 22500078
-      - X: 9999207
-        Y: 25000403
-      - X: 4999844
-        Y: 27499923
-      - X: 793
-        Y: 24999597
-    - - X: -35000156
-        Y: 2500078
-      - X: -30000793
-        Y: 5000403
-      - X: -35000156
-        Y: 7499923
-      - X: -39999207
-        Y: 4999597
-    - - X: 44999844
-        Y: 2500078
-      - X: 49999207
-        Y: 5000403
-      - X: 44999844
-        Y: 7499923
-      - X: 40000793
-        Y: 4999597
-    - - X: 4999844
-        Y: -17499923
-      - X: 9999207
-        Y: -14999597
-      - X: 4999844
-        Y: -12500078
-      - X: 793
-        Y: -15000403
+    - - X: 4999988
+        Y: 22500006
+      - X: 9999939
+        Y: 25000031
+      - X: 4999988
+        Y: 27499995
+      - X: 61
+        Y: 24999969
+    - - X: -35000012
+        Y: 2500006
+      - X: -30000061
+        Y: 5000031
+      - X: -35000012
+        Y: 7499995
+      - X: -39999939
+        Y: 4999969
+    - - X: 44999988
+        Y: 2500006
+      - X: 49999939
+        Y: 5000031
+      - X: 44999988
+        Y: 7499995
+      - X: 40000061
+        Y: 4999969
+    - - X: 4999988
+        Y: -17499995
+      - X: 9999939
+        Y: -14999969
+      - X: 4999988
+        Y: -12500006
+      - X: 61
+        Y: -15000031
   m_CompositePaths:
     m_Paths:
-    - - {x: 0.4999832, y: 2.2500083}
-      - {x: 0.9999146, y: 2.5000434}
-      - {x: 0.4999832, y: 2.7499917}
-      - {x: 0.0000854, y: 2.4999566}
-    - - {x: -3.500017, y: 0.2500084}
-      - {x: -3.0000854, y: 0.5000434}
-      - {x: -3.500017, y: 0.7499917}
-      - {x: -3.9999144, y: 0.4999566}
-    - - {x: 4.4999833, y: 0.2500084}
-      - {x: 4.9999146, y: 0.5000434}
-      - {x: 4.4999833, y: 0.7499917}
-      - {x: 4.000086, y: 0.4999566}
-    - - {x: 0.4999832, y: -1.7499917}
-      - {x: 0.9999146, y: -1.4999566}
-      - {x: 0.4999832, y: -1.2500085}
-      - {x: 0.0000854, y: -1.5000434}
+    - - {x: 0.49999762, y: 2.2500012}
+      - {x: 0.99998784, y: 2.5000062}
+      - {x: 0.49999762, y: 2.7499988}
+      - {x: 0.0000122, y: 2.4999938}
+    - - {x: -3.5000024, y: 0.2500012}
+      - {x: -3.0000122, y: 0.5000062}
+      - {x: -3.5000024, y: 0.7499989}
+      - {x: -3.999988, y: 0.4999938}
+    - - {x: 4.4999976, y: 0.2500012}
+      - {x: 4.999988, y: 0.5000062}
+      - {x: 4.4999976, y: 0.7499989}
+      - {x: 4.000012, y: 0.4999938}
+    - - {x: 0.49999762, y: -1.7499988}
+      - {x: 0.99998784, y: -1.4999938}
+      - {x: 0.49999762, y: -1.2500012}
+      - {x: 0.0000122, y: -1.5000062}
   m_VertexDistance: 0.0005
   m_OffsetDistance: 0.000005
 --- !u!50 &437731964
@@ -561,7 +561,7 @@ PrefabInstance:
     - target: {fileID: 2523802025086375213, guid: a1ffca712eb297c44b798f83b7092795,
         type: 3}
       propertyPath: m_Color.g
-      value: 0.49803922
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2523802025086375213, guid: a1ffca712eb297c44b798f83b7092795,
         type: 3}
@@ -652,7 +652,7 @@ PrefabInstance:
     - target: {fileID: 2523802025086375213, guid: a1ffca712eb297c44b798f83b7092795,
         type: 3}
       propertyPath: m_Color.r
-      value: 0.49803922
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2523802025086375213, guid: a1ffca712eb297c44b798f83b7092795,
         type: 3}
@@ -791,7 +791,10 @@ GameObject:
   - component: {fileID: 1529461835}
   - component: {fileID: 1529461837}
   - component: {fileID: 1529461836}
-  m_Layer: 0
+  - component: {fileID: 1529461840}
+  - component: {fileID: 1529461839}
+  - component: {fileID: 1529461838}
+  m_Layer: 10
   m_Name: Floor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3520,6 +3523,79 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!66 &1529461838
+CompositeCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1529461834}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_GeometryType: 1
+  m_GenerationType: 0
+  m_EdgeRadius: 0
+  m_ColliderPaths:
+  - m_Collider: {fileID: 1529461840}
+    m_ColliderPaths:
+    - - X: 4999844
+        Y: -37499798
+      - X: 89997629
+        Y: 5001079
+      - X: 4999425
+        Y: 47499540
+      - X: -79995609
+        Y: 4997916
+  m_CompositePaths:
+    m_Paths:
+    - - {x: 0.4999832, y: -3.7499793}
+      - {x: 8.999757, y: 0.500111}
+      - {x: 0.49994132, y: 4.7499537}
+      - {x: -7.999555, y: 0.4997885}
+  m_VertexDistance: 0.0005
+  m_OffsetDistance: 0.000005
+--- !u!50 &1529461839
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1529461834}
+  m_BodyType: 2
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!19719996 &1529461840
+TilemapCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1529461834}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 1
+  m_Offset: {x: 0, y: 0}
+  m_MaximumTileChangeCount: 1000
+  m_ExtrusionFactor: 0.00001
 --- !u!1 &1533170044
 GameObject:
   m_ObjectHideFlags: 0
@@ -3532,6 +3608,7 @@ GameObject:
   - component: {fileID: 1533170046}
   - component: {fileID: 1533170047}
   - component: {fileID: 1533170048}
+  - component: {fileID: 1533170049}
   m_Layer: 8
   m_Name: Player Controller
   m_TagString: Untagged
@@ -3565,7 +3642,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 583ec66c0289add4c8f885392a27bdf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tilemapGrid: {fileID: 1539336669}
+  movementHaloValidColor: {r: 1, g: 1, b: 1, a: 1}
+  movementHaloInvalidColor: {r: 0.625, g: 0.625, b: 0.625, a: 1}
   displayStyle:
     m_Name: 
     m_Normal:
@@ -3715,8 +3793,29 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.2, y: 0.2}
+  m_Size: {x: 0.3, y: 0.15}
   m_EdgeRadius: 0
+--- !u!50 &1533170049
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1533170044}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
 --- !u!1 &1539336669
 GameObject:
   m_ObjectHideFlags: 0
@@ -3833,7 +3932,7 @@ PrefabInstance:
     - target: {fileID: 2523802025086375213, guid: a1ffca712eb297c44b798f83b7092795,
         type: 3}
       propertyPath: m_Color.g
-      value: 0.49803922
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2523802025086375213, guid: a1ffca712eb297c44b798f83b7092795,
         type: 3}
@@ -3924,7 +4023,7 @@ PrefabInstance:
     - target: {fileID: 2523802025086375213, guid: a1ffca712eb297c44b798f83b7092795,
         type: 3}
       propertyPath: m_Color.r
-      value: 0.49803922
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2523802025086375213, guid: a1ffca712eb297c44b798f83b7092795,
         type: 3}
@@ -4022,10 +4121,15 @@ PrefabInstance:
       propertyPath: m_Color.b
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7812972427325995270, guid: a1ffca712eb297c44b798f83b7092795,
+        type: 3}
+      propertyPath: m_FlipX
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2523802025086375213, guid: a1ffca712eb297c44b798f83b7092795,
         type: 3}
       propertyPath: m_Color.r
-      value: 0.49803922
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2523802025086375213, guid: a1ffca712eb297c44b798f83b7092795,
         type: 3}
@@ -4069,7 +4173,7 @@ GameObject:
   - component: {fileID: 2037864131}
   - component: {fileID: 2037864135}
   - component: {fileID: 2037864134}
-  m_Layer: 10
+  m_Layer: 11
   m_Name: Walls
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4875,7 +4979,7 @@ CompositeCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_GeometryType: 0
+  m_GeometryType: 1
   m_GenerationType: 0
   m_EdgeRadius: 0
   m_ColliderPaths:

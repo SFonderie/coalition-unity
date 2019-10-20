@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8628401794807901042}
   - component: {fileID: 7812972427325995270}
   - component: {fileID: 2088030174428270903}
-  - component: {fileID: 9041823056698909514}
+  - component: {fileID: -8819972860193573323}
   m_Layer: 9
   m_Name: Character
   m_TagString: Untagged
@@ -130,8 +130,8 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 7
---- !u!61 &9041823056698909514
-BoxCollider2D:
+--- !u!60 &-8819972860193573323
+PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -153,9 +153,12 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 0.3, y: 0.3}
-  m_EdgeRadius: 0
+  m_Points:
+    m_Paths:
+    - - {x: 0, y: 0.175}
+      - {x: 0.375, y: 0}
+      - {x: 0, y: -0.175}
+      - {x: -0.375, y: 0}
 --- !u!1 &6137593754859028283
 GameObject:
   m_ObjectHideFlags: 0
