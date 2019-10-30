@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Tilemaps;
 
 namespace Coalition
@@ -21,10 +22,13 @@ namespace Coalition
         GameObject[] players;
         [SerializeField]
         GameObject[] enemies;
+        [SerializeField]
+        Canvas dialogueCanvas;
+        [SerializeField]
+        Sprite dialogueBackgroundTexture;
         #pragma warning restore CS0649
-        
-        Rect displayArea = new Rect(0, 0, Screen.width, Screen.height);
-        string displayText;
+        Text dialogueText;
+        SpriteRenderer dialogueSprite, dialogueBackground;
         Tilemap[] tilemaps;
         int playerIndex = 0, combatRound = 1, combatants, activeCombatant = 0;
         GameObject playerObj;
@@ -107,9 +111,31 @@ namespace Coalition
             }
         }
 
+        public void DisplayMessage(string message, Sprite portrait)
+        {
+            dialogueText.text = message;
+            dialogueSprite.sprite = portrait;
+            dialogueBackground.sprite = dialogueBackgroundTexture;
+            dialogueCanvas.enabled = true;
+        }
+
+        public void HideMessage()
+        {
+            dialogueText.text = "";
+            dialogueSprite.sprite = (Sprite) null;
+            dialogueBackground.sprite = (Sprite) null;
+            dialogueCanvas.enabled = false;
+        }
+
         // Use this for initialization
         void Start()
         {
+            dialogueText = dialogueCanvas.transform.Find("Text").GetComponent<Text>();
+            dialogueSprite = dialogueCanvas.transform.Find("Portrait").GetComponent<SpriteRenderer>();
+            dialogueBackground = dialogueCanvas.transform.Find("Background").GetComponent<SpriteRenderer>();
+
+            HideMessage();
+
             DebugLog("backspace = swap character    enter = start combat");
 
             mouseHalo = GetComponent<SpriteRenderer>();
@@ -127,6 +153,18 @@ namespace Coalition
         // Update is called once per frame
         void Update()
         {
+            if (Input.GetButtonDown("Fire3"))
+            {
+                if (dialogueCanvas.enabled)
+                {
+                    HideMessage();
+                }
+                else
+                {
+                    DisplayMessage(playerObj.name + " says hello", playerScript.GetPortrait());
+                }
+            }
+
             switch (combatState)
             {
                 case Globals.CombatState.none:
@@ -246,13 +284,13 @@ namespace Coalition
 
         void OnGUI()
         {
-            GUI.Label(displayArea, displayText, displayStyle);
+            
         }
 
         void DebugLog(string text)
         {
-            displayText = text;
-            Debug.Log(displayText);
+            //displayText = text;
+            Debug.Log(text);
         }
 
         void NextPlayer()

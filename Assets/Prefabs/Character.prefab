@@ -60,6 +60,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: baeefb129c4cdf74ca1d2ec90c0fc39e, type: 3}
   - {fileID: 21300000, guid: 933c73a37f003f6488ee4f7e0f6f4211, type: 3}
   - {fileID: 21300000, guid: ce0dde5adf913e7478a9819d90100df2, type: 3}
+  dialogueTexture: {fileID: 2800000, guid: 96645ec63f6854c43aefbe7707d847d1, type: 3}
 --- !u!212 &7812972427325995270
 SpriteRenderer:
   m_ObjectHideFlags: 0

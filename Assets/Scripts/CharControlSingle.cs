@@ -21,6 +21,9 @@ namespace Coalition
         #pragma warning disable CS0649
         [SerializeField]
         Sprite[] images;
+
+        [SerializeField]
+        Sprite portrait;
         #pragma warning restore CS0649
         
         bool canTurn = true;
@@ -32,6 +35,11 @@ namespace Coalition
         public Globals.Faction GetFaction()
         {
             return faction;
+        }
+
+        public Sprite GetPortrait()
+        {
+            return portrait;
         }
 
         public void SetInitiative(int i)
