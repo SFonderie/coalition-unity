@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraFollow : MonoBehaviour
+public class CameraControl : MonoBehaviour
 {
     [SerializeField]
     Vector3 offset = new Vector3(0, 0, -10f);

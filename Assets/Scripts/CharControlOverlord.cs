@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Tilemaps;
 
 namespace Coalition
@@ -24,11 +23,10 @@ namespace Coalition
         GameObject[] enemies;
         [SerializeField]
         Canvas dialogueCanvas;
-        [SerializeField]
-        Sprite dialogueBackgroundTexture;
+        //[SerializeField]
+        //Sprite dialogueBackgroundTexture;
         #pragma warning restore CS0649
-        Text dialogueText;
-        SpriteRenderer dialogueSprite, dialogueBackground;
+        DialogueCanvas dialogueScript;
         Tilemap[] tilemaps;
         int playerIndex = 0, combatRound = 1, combatants, activeCombatant = 0;
         GameObject playerObj;
@@ -89,7 +87,12 @@ namespace Coalition
             playerHandle = playerObj.GetComponent<Rigidbody2D>();
             playerHandle.constraints = RigidbodyConstraints2D.FreezeRotation;  //  make new player movable
 
-            Camera.main.GetComponent<CameraFollow>().SetTarget(playerObj.transform);
+            Camera.main.GetComponent<CameraControl>().SetTarget(playerObj.transform);
+        }
+
+        public GameObject GetPlayer()
+        {
+            return playerObj;
         }
 
         public void AllIsoSnap()
@@ -111,30 +114,11 @@ namespace Coalition
             }
         }
 
-        public void DisplayMessage(string message, Sprite portrait)
-        {
-            dialogueText.text = message;
-            dialogueSprite.sprite = portrait;
-            dialogueBackground.sprite = dialogueBackgroundTexture;
-            dialogueCanvas.enabled = true;
-        }
-
-        public void HideMessage()
-        {
-            dialogueText.text = "";
-            dialogueSprite.sprite = (Sprite) null;
-            dialogueBackground.sprite = (Sprite) null;
-            dialogueCanvas.enabled = false;
-        }
-
         // Use this for initialization
         void Start()
         {
-            dialogueText = dialogueCanvas.transform.Find("Text").GetComponent<Text>();
-            dialogueSprite = dialogueCanvas.transform.Find("Portrait").GetComponent<SpriteRenderer>();
-            dialogueBackground = dialogueCanvas.transform.Find("Background").GetComponent<SpriteRenderer>();
-
-            HideMessage();
+            dialogueScript = dialogueCanvas.GetComponent<DialogueCanvas>();
+            dialogueScript.HideMessage();
 
             DebugLog("backspace = swap character    enter = start combat");
 
@@ -155,13 +139,13 @@ namespace Coalition
         {
             if (Input.GetButtonDown("Fire3"))
             {
-                if (dialogueCanvas.enabled)
+                if (dialogueScript.IsEnabled())
                 {
-                    HideMessage();
+                    dialogueScript.HideMessage();
                 }
                 else
                 {
-                    DisplayMessage(playerObj.name + " says hello", playerScript.GetPortrait());
+                    dialogueScript.DisplayMessage(playerObj.name + " says hello", playerScript.GetPortrait());
                 }
             }
 
