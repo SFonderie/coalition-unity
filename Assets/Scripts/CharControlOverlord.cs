@@ -20,12 +20,11 @@ namespace Coalition
         [SerializeField]
         GameObject[] players;
         [SerializeField]
-        GameObject[] enemies;
-        [SerializeField]
         Canvas dialogueCanvas;
         //[SerializeField]
         //Sprite dialogueBackgroundTexture;
         #pragma warning restore CS0649
+        GameObject[] enemies;
         DialogueCanvas dialogueScript;
         Tilemap[] tilemaps;
         int playerIndex = 0, combatRound = 1, combatants, activeCombatant = 0;
@@ -42,6 +41,11 @@ namespace Coalition
         Globals.MoveMode moveMode = Globals.MoveMode.free;
         Globals.CombatState combatState = Globals.CombatState.none;
         Globals.Faction playerFaction = Globals.Faction.neutral;
+
+        public Globals.MoveMode GetMoveMode()
+        {
+            return moveMode;
+        }
         
         public void SetMoveMode(Globals.MoveMode mode)
         {
@@ -87,7 +91,7 @@ namespace Coalition
             playerHandle = playerObj.GetComponent<Rigidbody2D>();
             playerHandle.constraints = RigidbodyConstraints2D.FreezeRotation;  //  make new player movable
 
-            Camera.main.GetComponent<CameraControl>().SetTarget(playerObj.transform);
+            Camera.main.GetComponent<CameraControl>().SetTarget(playerObj);
         }
 
         public GameObject GetPlayer()
@@ -114,13 +118,46 @@ namespace Coalition
             }
         }
 
+        public void StartCombat(ref GameObject[] enemyTeam)
+        {
+            DebugLog(".");
+            enemies = new GameObject[enemyTeam.Length];
+            for (int i = 0; i < enemyTeam.Length; i++)
+            {
+                enemies[i] = enemyTeam[i];
+            }
+
+            AllIsoSnap();
+            SortInitiative();
+            //DebugLog("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)");
+            SetPlayer(initiativeList[activeCombatant]);
+            if (playerFaction == Globals.Faction.ally)
+            {
+                SetMoveMode(Globals.MoveMode.click);
+            }
+            else
+            {
+                SetMoveMode(Globals.MoveMode.none);
+            }
+            combatState = Globals.CombatState.combat;
+        }
+
+        public void ClearCombat()
+        {
+            //DebugLog("End combat: returning control to " + players[playerIndex].name);
+            SetPlayer(players[playerIndex]);
+            SetMoveMode(Globals.MoveMode.free);
+            combatRound = 1;
+            combatState = Globals.CombatState.none;
+
+            enemies = new GameObject[0];
+        }
+
         // Use this for initialization
         void Start()
         {
             dialogueScript = dialogueCanvas.GetComponent<DialogueCanvas>();
             dialogueScript.HideMessage();
-
-            DebugLog("backspace = swap character    enter = start combat");
 
             mouseHalo = GetComponent<SpriteRenderer>();
             mouseHaloCollider = GetComponent<Collider2D>();
@@ -137,22 +174,10 @@ namespace Coalition
         // Update is called once per frame
         void Update()
         {
-            if (Input.GetButtonDown("Fire3"))
-            {
-                if (dialogueScript.IsEnabled())
-                {
-                    dialogueScript.HideMessage();
-                }
-                else
-                {
-                    dialogueScript.DisplayMessage(playerObj.name + " says hello", playerScript.GetPortrait());
-                }
-            }
-
             switch (combatState)
             {
                 case Globals.CombatState.none:
-                    if (Input.GetButtonDown("DummyCombat"))  //  start combat round
+                    /*if (Input.GetButtonDown("DummyCombat"))  //  start combat round
                     {
                         AllIsoSnap();
                         SortInitiative();
@@ -168,7 +193,7 @@ namespace Coalition
                         }
                         combatState = Globals.CombatState.combat;
                     }
-                    else if (Input.GetButtonDown("SwapCharacter"))  //  swap character out of combat
+                    else */if (Input.GetButtonDown("SwapCharacter"))  //  swap character out of combat
                     {
                         NextPlayer();
                     }
@@ -176,11 +201,12 @@ namespace Coalition
                 case Globals.CombatState.combat:
                     if (Input.GetButtonDown("DummyCombat"))  //  end combat
                     {
-                        DebugLog("End combat: returning control to " + players[playerIndex].name);
+                        /*DebugLog("End combat: returning control to " + players[playerIndex].name);
                         SetPlayer(players[playerIndex]);
                         SetMoveMode(Globals.MoveMode.free);
                         combatRound = 1;
-                        combatState = Globals.CombatState.none;
+                        combatState = Globals.CombatState.none;*/
+                        ClearCombat();
                     }
                     else if ((Input.GetButtonDown("DummyAction") && playerFaction == Globals.Faction.ally) || nonPlayerTurn)  //  active combatant takes their turn
                     {
@@ -200,12 +226,12 @@ namespace Coalition
 
                         if (playerFaction == Globals.Faction.ally)
                         {
-                            DebugLog("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)");
+                            //DebugLog("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)");
                             SetMoveMode(Globals.MoveMode.click);
                         }
                         else
                         {
-                            DebugLog("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + " is taking their turn");
+                            //DebugLog("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + " is taking their turn");
                             SetMoveMode(Globals.MoveMode.none);
                         }
                     }

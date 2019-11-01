@@ -10,10 +10,15 @@ public class CameraControl : MonoBehaviour
     [SerializeField]
     float smoothFactor = 0.05f;
 
-    Transform target;
+    GameObject target;
     Vector3 velocity = Vector3.zero;
 
-    public void SetTarget(Transform newTarget)
+    public GameObject GetTarget()
+    {
+        return target;
+    }
+
+    public void SetTarget(GameObject newTarget)
     {
         target = newTarget;
     }
@@ -27,6 +32,9 @@ public class CameraControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = Vector3.SmoothDamp(transform.position, target.TransformPoint(offset), ref velocity, smoothFactor);
+        if (target != null)
+        {
+            transform.position = Vector3.SmoothDamp(transform.position, target.transform.TransformPoint(offset), ref velocity, smoothFactor);
+        }
     }
 }
