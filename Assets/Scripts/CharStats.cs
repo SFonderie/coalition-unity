@@ -1,12 +1,32 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
+[Serializable]
 public class CharStats
 {
+    //This character's maximum actions per round.
+    public CharacterStatistic MaxActions = new CharacterStatistic(3);
 
+    //This character's maximum health at any given time.
+    public CharacterStatistic MaxHealth = new CharacterStatistic(100);
+
+    //This character's base armor value.
+    public CharacterStatistic ArmorValue = new CharacterStatistic(0);
+
+    //This character's movement speed per action in tiles.
+    public CharacterStatistic MoveSpeed = new CharacterStatistic(3);
+
+    //This character's current actions remaining for its turn.
+    private float actionsRemaining;
+
+    //This character's current health value.
+    private float currentHealth;
+
+    //Which of this character's weapons is it currently using.
+    private int weaponUsing;
 }
+
 
 [Serializable]
 public class CharacterStatistic
@@ -16,27 +36,27 @@ public class CharacterStatistic
     public float Value {
         get
         {
-            if(isDirty)
+            if(_isDirty)
             {
                 _value = GetFinalValue();
-                isDirty = false;
+                _isDirty = false;
             }
 
             return _value;
         }
     }
 
-    private readonly List<StatMod> modifiers;
+    private readonly List<StatMod> _modifiers;
 
     public readonly ReadOnlyCollection<StatMod> StatModifiers;
 
-    private bool isDirty = true;
+    private bool _isDirty = true;
     private float _value;
 
     public CharacterStatistic()
     {
-        modifiers = new List<StatMod>();
-        StatModifiers = modifiers.AsReadOnly();
+        _modifiers = new List<StatMod>();
+        StatModifiers = _modifiers.AsReadOnly();
     }
 
     public CharacterStatistic(float baseValue) : this()
@@ -46,9 +66,9 @@ public class CharacterStatistic
 
     public void AddModifier(StatMod mod)
     {
-        isDirty = true;
-        modifiers.Add(mod);
-        modifiers.Sort(CompareModOrder);
+        _isDirty = true;
+        _modifiers.Add(mod);
+        _modifiers.Sort(CompareModOrder);
     }
 
     private int CompareModOrder(StatMod a, StatMod b)
@@ -60,9 +80,9 @@ public class CharacterStatistic
 
     public bool RemoveModifier(StatMod mod)
     {
-        if(modifiers.Remove(mod))
+        if(_modifiers.Remove(mod))
         {
-            isDirty = true;
+            _isDirty = true;
             return true;
         }
 
@@ -73,13 +93,13 @@ public class CharacterStatistic
     {
         bool didRemove = false;
 
-        for(int i = modifiers.Count - 1; i >= 0; i--)
+        for(int i = _modifiers.Count - 1; i >= 0; i--)
         {
-            if(modifiers[i].Source == source)
+            if(_modifiers[i].Source == source)
             {
-                isDirty = true;
+                _isDirty = true;
                 didRemove = true;
-                modifiers.RemoveAt(i);
+                _modifiers.RemoveAt(i);
             }
         }
 
@@ -91,9 +111,9 @@ public class CharacterStatistic
         float final = BaseValue;
         float sumPercentAdd = 0;
 
-        for(int i = 0; i < modifiers.Count; i++)
+        for(int i = 0; i < _modifiers.Count; i++)
         {
-            StatMod mod = modifiers[i];
+            StatMod mod = _modifiers[i];
 
             if(mod.Type == StatModType.flat)
             {
@@ -103,7 +123,7 @@ public class CharacterStatistic
             {
                 sumPercentAdd += mod.Mod;
 
-                if(i + 1 >= modifiers.Count || modifiers[i + 1].Type != StatModType.percent_add)
+                if(i + 1 >= _modifiers.Count || _modifiers[i + 1].Type != StatModType.percent_add)
                 {
                     final *= 1 + sumPercentAdd;
                     sumPercentAdd = 0;
