@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraFollow : MonoBehaviour
+public class CameraControl : MonoBehaviour
 {
     [SerializeField]
     Vector3 offset = new Vector3(0, 0, -10f);
@@ -10,10 +10,15 @@ public class CameraFollow : MonoBehaviour
     [SerializeField]
     float smoothFactor = 0.05f;
 
-    Transform target;
+    GameObject target;
     Vector3 velocity = Vector3.zero;
 
-    public void SetTarget(Transform newTarget)
+    public GameObject GetTarget()
+    {
+        return target;
+    }
+
+    public void SetTarget(GameObject newTarget)
     {
         target = newTarget;
     }
@@ -27,6 +32,9 @@ public class CameraFollow : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = Vector3.SmoothDamp(transform.position, target.TransformPoint(offset), ref velocity, smoothFactor);
+        if (target != null)
+        {
+            transform.position = Vector3.SmoothDamp(transform.position, target.transform.TransformPoint(offset), ref velocity, smoothFactor);
+        }
     }
 }

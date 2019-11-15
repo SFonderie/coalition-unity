@@ -14,10 +14,10 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
-  - 
+  - MovementHalo
+  - Characters
+  - Floor
+  - Scenery
   - 
   - 
   - 
@@ -48,6 +48,15 @@ TagManager:
   - name: Entity
     uniqueID: 1822142559
     locked: 0
-  - name: Walls
+  - name: Walls (upper)
     uniqueID: 2996011355
+    locked: 0
+  - name: Scenery
+    uniqueID: 2329129545
+    locked: 0
+  - name: Walls (lower)
+    uniqueID: 777315569
+    locked: 0
+  - name: GUI
+    uniqueID: 4118698453
     locked: 0
