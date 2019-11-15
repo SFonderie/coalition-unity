@@ -4,53 +4,19 @@ using UnityEngine;
 
 namespace Coalition
 {
-    [System.Serializable]
-    public class DialogueData
-    {
-        #pragma warning disable CS0649
-        [SerializeField]
-        Sprite characterPortrait;
-        [SerializeField]
-        string message;
-        [SerializeField]
-        bool stopMovement;
-        [SerializeField]
-        GameObject cameraTarget;
-        #pragma warning restore CS0649
-
-        public string GetText()
-        {
-            return message;
-        }
-
-        public Sprite GetPortrait()
-        {
-            return characterPortrait;
-        }
-
-        public bool GetStop()
-        {
-            return stopMovement;
-        }
-
-        public GameObject GetTarget()
-        {
-            return cameraTarget;
-        }
-    }
-
     public class TriggerDialogue : MonoBehaviour
     {
         #pragma warning disable CS0649
         [SerializeField]
-        bool doOnce = true;
+        bool isActive = true;
         [SerializeField]
-        DialogueData[] dialogueStages;
+        int doTimes = 1;
+        [SerializeField]
+        G.DialogueData[] dialogueStages;
         #pragma warning restore CS0649
-
         CharControlOverlord playerScript;
         DialogueCanvas dialogueScript;
-        bool doneOnce = false;
+        int timesDone = 0;
 
         // Start is called before the first frame update
         void Start()
@@ -67,9 +33,9 @@ namespace Coalition
 
         void OnTriggerEnter2D(Collider2D col)
         {
-            if ((!doOnce || !doneOnce) && IsValidCollider(col))
+            if (isActive && timesDone < doTimes && IsValidCollider(col))
             {
-                doneOnce = true;
+                timesDone++;
                 //  pass data to the dialogue manager
                 dialogueScript.LoadDialogueData(ref dialogueStages);
                 //  activate dialogue manager

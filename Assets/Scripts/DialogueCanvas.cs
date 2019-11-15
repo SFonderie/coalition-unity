@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,23 +12,23 @@ namespace Coalition
         SpriteRenderer dialoguePortrait, dialogueBackground;
         Button dialogueButton;
         bool isEnabled = true;
-        DialogueData[] dialogueStages;
+        G.DialogueData[] dialogueStages;
         int currentStage = 0;
         CharControlOverlord playerScript;
         int playerMoveBackup = -1;
         CameraControl cameraScript;
         GameObject cameraTargetBackup;
 
-        public void LoadDialogueData(ref DialogueData[] data)
+        public void LoadDialogueData(ref G.DialogueData[] data)
         {
-            dialogueStages = new DialogueData[data.Length];
-            System.Array.Copy(data, dialogueStages, data.Length);
+            dialogueStages = new G.DialogueData[data.Length];
+            Array.Copy(data, dialogueStages, data.Length);
             currentStage = 0;
         }
 
         public void ClearDialogueData()
         {
-            dialogueStages = new DialogueData[0];
+            dialogueStages = new G.DialogueData[0];
             currentStage = 0;
         }
         
@@ -43,7 +44,7 @@ namespace Coalition
                 {
                     playerMoveBackup = (int) playerScript.GetMoveMode();
                 }
-                playerScript.SetMoveMode(Globals.MoveMode.none);
+                playerScript.SetMoveMode(G.MoveMode.none);
             }
 
             if (cameraTarget != null)
@@ -65,7 +66,7 @@ namespace Coalition
             isEnabled = true;
         }
 
-        public void DisplayMessage(DialogueData dialogue)
+        public void DisplayMessage(G.DialogueData dialogue)
         {
             DisplayMessage(dialogue.GetText(), dialogue.GetPortrait(), dialogue.GetStop(), dialogue.GetTarget(), currentStage == 0);
         }

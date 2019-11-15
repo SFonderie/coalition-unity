@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,22 +7,19 @@ namespace Coalition
 {
     public class CharControlSingle : MonoBehaviour
     {
-        [SerializeField]
-        Globals.Faction faction = Globals.Faction.neutral;
-
-        [SerializeField]
-        float moveSpeed = 2f;
-
-        [SerializeField]
-        int initiativeMod = 0;
-
-        [SerializeField]
-        int startFacingAngle = 0;
-
         #pragma warning disable CS0649
         [SerializeField]
+        G.Faction faction = G.Faction.neutral;
+        [SerializeField]
+        float moveSpeed = 2f;
+        [SerializeField]
+        int initiativeMod = 0;
+        [SerializeField]
+        G.CombatAction[] combatActions;
+        [SerializeField]
+        int startFacingAngle = 0;
+        [SerializeField]
         Sprite[] images;
-
         [SerializeField]
         Sprite portrait;
         #pragma warning restore CS0649
@@ -32,9 +30,19 @@ namespace Coalition
         Vector2 moveHere, isoCoords, closeCoords;
         Color[] colorNeutral = new Color[] { new Color(0.5f, 0.5f, 0.5f), new Color(1, 1, 1) }, colorAlly = new Color[] { new Color(0, 0.5f, 0), new Color(0, 1, 0) }, colorEnemy = new Color[] { new Color(0.5f, 0, 0), new Color(1, 0, 0) };
 
-        public Globals.Faction GetFaction()
+        public float GetMoveSpeed()
+        {
+            return moveSpeed;
+        }
+
+        public G.Faction GetFaction()
         {
             return faction;
+        }
+
+        public G.CombatAction[] GetCombatActions()
+        {
+            return combatActions;
         }
 
         public Sprite GetPortrait()
@@ -56,7 +64,7 @@ namespace Coalition
 
         public int RollInitiative()
         {
-            initiative = Random.Range(1, 20) + initiativeMod;
+            initiative = UnityEngine.Random.Range(1, 20) + initiativeMod;
             return initiative;
         }
 
@@ -93,10 +101,18 @@ namespace Coalition
             }
         }
 
+        public void TurnToAngle(float degrees)
+        {
+            if (canTurn)
+            {
+                playerSprite.sprite = images[GetSpriteIndex(degrees)];
+            }
+        }
+
         public void IsoSnap()
         {
-            Globals.CartToNearestIso(transform.position.x, transform.position.y, ref isoCoords);
-            Globals.IsoToCart(isoCoords.x, isoCoords.y, ref closeCoords);
+            G.CartToNearestIso(transform.position.x, transform.position.y, ref isoCoords);
+            G.IsoToCart(isoCoords.x, isoCoords.y, ref closeCoords);
 
             moveHere = new Vector2(closeCoords.x, closeCoords.y);
             transform.position = (Vector3) moveHere;
@@ -116,8 +132,8 @@ namespace Coalition
                 transform.position = (Vector3) moveHere;
             }
 
-            Globals.CartToNearestIso(transform.position.x, transform.position.y, ref isoCoords);
-            Globals.IsoToCart(isoCoords.x, isoCoords.y, ref closeCoords);
+            G.CartToNearestIso(transform.position.x, transform.position.y, ref isoCoords);
+            G.IsoToCart(isoCoords.x, isoCoords.y, ref closeCoords);
 
             TurnToward(x, y);
         }
@@ -126,14 +142,14 @@ namespace Coalition
         {
             switch (faction)
             {
-                case Globals.Faction.neutral:
-                    haloSprite.color = colorNeutral[System.Convert.ToInt32(active)];
+                case G.Faction.neutral:
+                    haloSprite.color = colorNeutral[Convert.ToInt32(active)];
                     break;
-                case Globals.Faction.ally:
-                    haloSprite.color = colorAlly[System.Convert.ToInt32(active)];
+                case G.Faction.ally:
+                    haloSprite.color = colorAlly[Convert.ToInt32(active)];
                     break;
-                case Globals.Faction.enemy:
-                    haloSprite.color = colorEnemy[System.Convert.ToInt32(active)];
+                case G.Faction.enemy:
+                    haloSprite.color = colorEnemy[Convert.ToInt32(active)];
                     break;
                 default:
                     break;
@@ -153,8 +169,8 @@ namespace Coalition
 
             playerSprite.sprite = images[GetSpriteIndex(startFacingAngle)];
 
-            Globals.CartToNearestIso(transform.position.x, transform.position.y, ref isoCoords);
-            Globals.IsoToCart(isoCoords.x, isoCoords.y, ref closeCoords);
+            G.CartToNearestIso(transform.position.x, transform.position.y, ref isoCoords);
+            G.IsoToCart(isoCoords.x, isoCoords.y, ref closeCoords);
         }
 
         // Update is called once per frame
@@ -167,8 +183,8 @@ namespace Coalition
         {
             if (!relative)
             {
-                x = (x - transform.position.x) * Globals.tileFactor.x;
-                y = (y - transform.position.y) * Globals.tileFactor.y;
+                x = (x - transform.position.x) * G.tileFactor.x;
+                y = (y - transform.position.y) * G.tileFactor.y;
             }
             float angleFactor = Mathf.Abs(x / y);
 
@@ -261,95 +277,6 @@ namespace Coalition
                 }
             }
 
-            /*if (x < 0)
-            {
-                if (y < 0) //quadrant 3
-                {
-                    if (0 < newThing && newThing <= 0.5)
-                    {
-                        return 90;
-                    }
-                    else if (0.5 < newThing && newThing <= 2)
-                    {
-                        return 45;
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                    //return 180 + ((Mathf.Atan2(-1 * x, -1 * y)) * Mathf.Rad2Deg);
-                }
-                else if (y == 0) //left
-                {
-                    return 180;
-                }
-                else if (y > 0) //quadrant 2
-                {
-                    if (0 < newThing && newThing <= 0.5)
-                    {
-                        return 90;
-                    }
-                    else if (0.5 < newThing && newThing <= 2)
-                    {
-                        return 45;
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                    //return 180 - ((Mathf.Atan2(-1 * x, y)) * Mathf.Rad2Deg);
-                }
-            }
-            else if (x == 0)
-            {
-                if (y < 0) //down
-                {
-                    return 270;
-                }
-                else if (y > 0) //up
-                {
-                    return 90;
-                }
-            }
-            else if (x > 0)
-            {
-                if (y < 0) //quadrant 4
-                {
-                    if (0 < newThing && newThing <= 0.5)
-                    {
-                        return 90;
-                    }
-                    else if (0.5 < newThing && newThing <= 2)
-                    {
-                        return 45;
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                    //return 360 - ((Mathf.Atan2(x, -1 * y)) * Mathf.Rad2Deg);
-                }
-                else if (y == 0) //right
-                {
-                    return 0;
-                }
-                else if (y > 0) //quadrant 1
-                {
-                    if (0 < newThing && newThing <= 0.5)
-                    {
-                        return 90;
-                    }
-                    else if (0.5 < newThing && newThing <= 2)
-                    {
-                        return 45;
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                    //return (Mathf.Atan2(x, y)) * Mathf.Rad2Deg;
-                }
-            }*/
             return 0;
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -20,11 +21,12 @@ namespace Coalition
         [SerializeField]
         GameObject[] players;
         [SerializeField]
+        Canvas actionCanvas;
+        [SerializeField]
         Canvas dialogueCanvas;
-        //[SerializeField]
-        //Sprite dialogueBackgroundTexture;
         #pragma warning restore CS0649
         GameObject[] enemies;
+        ActionCanvas actionScript;
         DialogueCanvas dialogueScript;
         Tilemap[] tilemaps;
         int playerIndex = 0, combatRound = 1, combatants, activeCombatant = 0;
@@ -38,32 +40,32 @@ namespace Coalition
         Vector2 mouseIso, mouseClose;
         SpriteRenderer mouseHalo;
         Collider2D mouseHaloCollider;
-        Globals.MoveMode moveMode = Globals.MoveMode.free;
-        Globals.CombatState combatState = Globals.CombatState.none;
-        Globals.Faction playerFaction = Globals.Faction.neutral;
+        G.MoveMode moveMode = G.MoveMode.free;
+        G.CombatState combatState = G.CombatState.none;
+        G.Faction playerFaction = G.Faction.neutral;
 
-        public Globals.MoveMode GetMoveMode()
+        public G.MoveMode GetMoveMode()
         {
             return moveMode;
         }
         
-        public void SetMoveMode(Globals.MoveMode mode)
+        public void SetMoveMode(G.MoveMode mode)
         {
-            mouseHalo.enabled = (mode == Globals.MoveMode.click);
+            mouseHalo.enabled = (mode == G.MoveMode.click);
             moveMode = mode;
         }
 
         public void SetMoveMode(int mode)
         {
-            if (System.Enum.IsDefined(typeof(Globals.MoveMode), mode))
+            if (Enum.IsDefined(typeof(G.MoveMode), mode))
             {
-                SetMoveMode((Globals.MoveMode) mode);
+                SetMoveMode((G.MoveMode) mode);
             }
         }
 
         public bool CanMove()
         {
-            return (moveMode != Globals.MoveMode.none);
+            return (moveMode != G.MoveMode.none);
         }
 
         public bool IsPlayerNull()
@@ -120,35 +122,25 @@ namespace Coalition
 
         public void StartCombat(ref GameObject[] enemyTeam)
         {
-            DebugLog(".");
             enemies = new GameObject[enemyTeam.Length];
             for (int i = 0; i < enemyTeam.Length; i++)
             {
                 enemies[i] = enemyTeam[i];
             }
-
             AllIsoSnap();
             SortInitiative();
-            //DebugLog("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)");
             SetPlayer(initiativeList[activeCombatant]);
-            if (playerFaction == Globals.Faction.ally)
-            {
-                SetMoveMode(Globals.MoveMode.click);
-            }
-            else
-            {
-                SetMoveMode(Globals.MoveMode.none);
-            }
-            combatState = Globals.CombatState.combat;
+            AlignCombat();
+            combatState = G.CombatState.combat;
         }
 
         public void ClearCombat()
         {
-            //DebugLog("End combat: returning control to " + players[playerIndex].name);
+            //Debug.Log("End combat: returning control to " + players[playerIndex].name);
             SetPlayer(players[playerIndex]);
-            SetMoveMode(Globals.MoveMode.free);
+            SetMoveMode(G.MoveMode.free);
             combatRound = 1;
-            combatState = Globals.CombatState.none;
+            combatState = G.CombatState.none;
 
             enemies = new GameObject[0];
         }
@@ -156,19 +148,16 @@ namespace Coalition
         // Use this for initialization
         void Start()
         {
+            actionScript = actionCanvas.GetComponent<ActionCanvas>();
+
             dialogueScript = dialogueCanvas.GetComponent<DialogueCanvas>();
             dialogueScript.HideMessage();
 
             mouseHalo = GetComponent<SpriteRenderer>();
             mouseHaloCollider = GetComponent<Collider2D>();
 
-            SetMoveMode(Globals.MoveMode.free);
+            SetMoveMode(G.MoveMode.free);
             SetPlayer(players[playerIndex]);
-        }
-
-        void FixedUpdate()
-        {
-            
         }
         
         // Update is called once per frame
@@ -176,39 +165,21 @@ namespace Coalition
         {
             switch (combatState)
             {
-                case Globals.CombatState.none:
-                    /*if (Input.GetButtonDown("DummyCombat"))  //  start combat round
-                    {
-                        AllIsoSnap();
-                        SortInitiative();
-                        DebugLog("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)");
-                        SetPlayer(initiativeList[activeCombatant]);
-                        if (playerFaction == Globals.Faction.ally)
-                        {
-                            SetMoveMode(Globals.MoveMode.click);
-                        }
-                        else
-                        {
-                            SetMoveMode(Globals.MoveMode.none);
-                        }
-                        combatState = Globals.CombatState.combat;
-                    }
-                    else */if (Input.GetButtonDown("SwapCharacter"))  //  swap character out of combat
+                case G.CombatState.none:
+                {
+                    if (Input.GetButtonDown("SwapCharacter"))  //  swap character out of combat
                     {
                         NextPlayer();
                     }
                     break;
-                case Globals.CombatState.combat:
+                }
+                case G.CombatState.combat:
+                {
                     if (Input.GetButtonDown("DummyCombat"))  //  end combat
                     {
-                        /*DebugLog("End combat: returning control to " + players[playerIndex].name);
-                        SetPlayer(players[playerIndex]);
-                        SetMoveMode(Globals.MoveMode.free);
-                        combatRound = 1;
-                        combatState = Globals.CombatState.none;*/
                         ClearCombat();
                     }
-                    else if ((Input.GetButtonDown("DummyAction") && playerFaction == Globals.Faction.ally) || nonPlayerTurn)  //  active combatant takes their turn
+                    else if ((Input.GetButtonDown("DummyAction") && playerFaction == G.Faction.ally) || nonPlayerTurn)  //  active combatant takes their turn
                     {
                         nonPlayerTurn = false;
 
@@ -224,19 +195,10 @@ namespace Coalition
 
                         SetPlayer(initiativeList[activeCombatant]);
 
-                        if (playerFaction == Globals.Faction.ally)
-                        {
-                            //DebugLog("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)");
-                            SetMoveMode(Globals.MoveMode.click);
-                        }
-                        else
-                        {
-                            //DebugLog("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + " is taking their turn");
-                            SetMoveMode(Globals.MoveMode.none);
-                        }
+                        AlignCombat();
                     }
                     
-                    if (playerFaction == Globals.Faction.enemy)  //  wait for a second to simulate enemy character's turn; remove this after actually implementing character actions
+                    if (playerFaction == G.Faction.enemy)  //  wait for a second to simulate enemy character's turn; remove this after actually implementing character actions
                     {
                         nonPlayerTimer -= Time.deltaTime;
                         if (nonPlayerTimer <= 0)
@@ -246,15 +208,21 @@ namespace Coalition
                         }
                     }
                     break;
+                }
                 default:
+                {
                     break;
+                }
             }
 
             switch (moveMode)
             {
-                case Globals.MoveMode.none:
+                case G.MoveMode.none:
+                {
                     break;
-                case Globals.MoveMode.free:
+                }
+                case G.MoveMode.free:
+                {
                     if ((Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0) && !IsPlayerNull())
                     {
                         playerScript.Move(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
@@ -262,11 +230,13 @@ namespace Coalition
                         playerScript.TurnToward(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
                     }
                     break;
-                case Globals.MoveMode.click:
+                }
+                case G.MoveMode.click:
+                {
                     //  get the world location that the mouse is pointing to
                     mouseLocation = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                    Globals.CartToNearestIso(mouseLocation.x, mouseLocation.y, ref mouseIso);
-                    Globals.IsoToCart(mouseIso.x, mouseIso.y, ref mouseClose);
+                    G.CartToNearestIso(mouseLocation.x, mouseLocation.y, ref mouseIso);
+                    G.IsoToCart(mouseIso.x, mouseIso.y, ref mouseClose);
                     //  place the movement halo there
                     transform.position = (Vector3) mouseClose;
                     //  have the active character turn to look at that spot
@@ -287,20 +257,12 @@ namespace Coalition
                         mouseHalo.color = movementHaloInvalidColor;
                     }
                     break;
+                }
                 default:
+                {
                     break;
+                }
             }
-        }
-
-        void OnGUI()
-        {
-            
-        }
-
-        void DebugLog(string text)
-        {
-            //displayText = text;
-            Debug.Log(text);
         }
 
         void NextPlayer()
@@ -356,6 +318,22 @@ namespace Coalition
             activeCombatant = 0;
 
             initiativeList = initiativeList.OrderByDescending(x => x.GetComponent<CharControlSingle>().RollInitiative()).ToArray();
+        }
+
+        void AlignCombat()
+        {
+            if (playerFaction == G.Faction.ally)
+            {
+                //Debug.Log("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)");
+                SetMoveMode(G.MoveMode.click);
+                actionScript.ShowCombatActions(playerScript.GetCombatActions());
+            }
+            else
+            {
+                //Debug.Log("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + " is taking their turn");
+                SetMoveMode(G.MoveMode.none);
+                actionScript.HideCombatActions();
+            }
         }
     }
 }
