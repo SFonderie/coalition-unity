@@ -50,6 +50,7 @@ MonoBehaviour:
   faction: 0
   moveSpeed: 2
   initiativeMod: 0
+  combatActions: 
   startFacingAngle: 0
   images:
   - {fileID: 21300000, guid: 8b5e1924f7a67b3469bceb686b75e11b, type: 3}
@@ -60,7 +61,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: baeefb129c4cdf74ca1d2ec90c0fc39e, type: 3}
   - {fileID: 21300000, guid: 933c73a37f003f6488ee4f7e0f6f4211, type: 3}
   - {fileID: 21300000, guid: ce0dde5adf913e7478a9819d90100df2, type: 3}
-  dialogueTexture: {fileID: 2800000, guid: 96645ec63f6854c43aefbe7707d847d1, type: 3}
+  portrait: {fileID: 0}
+  facingAngle: 0
 --- !u!212 &7812972427325995270
 SpriteRenderer:
   m_ObjectHideFlags: 0
