@@ -244,7 +244,7 @@ namespace Coalition
                     //  hide the halo if there is no floor tile there
                     mouseHalo.enabled = mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Floor"));
                     //  set the halo brightness and actually allow movement if the spot is valid
-                    if (mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Floor")) && !mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Scenery")) && Vector2.Distance(playerScript.GetIsoCoords(), mouseIso) <= combatMoveDistance)
+                    if (mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Floor")) && !mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Scenery")) && !mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Characters")) && Vector2.Distance(playerScript.GetIsoCoords(), mouseIso) <= combatMoveDistance)
                     {
                         mouseHalo.color = movementHaloValidColor;
                         if (Input.GetButtonDown("Fire1"))
