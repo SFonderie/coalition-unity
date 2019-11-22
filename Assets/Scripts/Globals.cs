@@ -77,5 +77,25 @@ namespace Coalition
         {
             vector = new Vector2(tileHalfSize.x * ((-1 * isoX) + isoY), tileHalfSize.y * (isoX + isoY));
         }
+
+        public static float EuclidToIso(float degrees)
+        {
+            return degrees - 15 * Mathf.Sin(Mathf.Deg2Rad * 2 * degrees);
+        }
+
+        public static float IsoAngleScale(float degrees, float coef)
+        {
+            return 1 + coef * Mathf.Pow(Mathf.Sin(degrees * Mathf.Deg2Rad), 2);
+        }
+
+        public static float IsoAngleScaleX(float degrees)
+        {
+            return IsoAngleScale(degrees, -0.5f);
+        }
+
+        public static float IsoAngleScaleY(float degrees)
+        {
+            return IsoAngleScale(degrees, 1f);
+        }
     }
 }

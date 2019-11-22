@@ -9,29 +9,48 @@ namespace Coalition
     {
         #pragma warning disable CS0649
         [SerializeField]
+        ContactFilter2D raycastFilter;
+        [SerializeField]
         float waypointProximity = 0.1f;
         [SerializeField]
         Transform[] waypoints;
         #pragma warning restore CS0649
         CharControlSingle control;
+        PolygonCollider2D visionCone;
         float moveSpeed = 0;
         int doMode = 0;
         Waypoint waypoint;
         bool shouldRotate = false;
         float angle;
-        int turnState = 0, i = 0;
+        float isoAngle;
+        Vector2 facingDirection;
+        int turnState = -1, i = 0;
         G.WaypointLookMode wpLookMode;
         float wpTimeBefore, wpTimeAfter, wpLookDirection, wpLookRange, wpLookSpeed, currentWait = 0;
         int wpLookCycles, currentCycle;
+        RaycastHit2D[] raycastHits;
+        [SerializeField]
+        float sightDistance = 5f;
+        [SerializeField]
+        float sightAngle = 30f;
+        Vector2[] sightPoints;
+
+        public ContactFilter2D GetRaycastFilter()
+        {
+            return raycastFilter;
+        }
 
         void Start()
         {
             control = GetComponent<CharControlSingle>();
             moveSpeed = control.GetMoveSpeed();
+            visionCone = transform.Find("VisionCone").GetComponent<PolygonCollider2D>();
         }
 
         void Update()
         {
+            facingDirection = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+
             if (waypoints.Length > 0)
             {
                 if (Vector2.Distance(transform.position, waypoints[i].position) < waypointProximity)
@@ -56,19 +75,19 @@ namespace Coalition
                         }
                         case 1:  //  pre-wait
                         {
+                            currentWait += Time.deltaTime;
                             if (currentWait >= wpTimeBefore)
                             {
                                 if (wpLookMode != G.WaypointLookMode.none)
                                 {
                                     angle = wpLookDirection;
-                                    control.TurnToAngle(angle);
                                 }
 
+                                turnState = 0;
                                 currentWait = 0;
                                 currentCycle = 1;
                                 doMode = 2;
                             }
-                            currentWait += Time.deltaTime;
                             break;
                         }
                         case 2:  //  look
@@ -99,31 +118,33 @@ namespace Coalition
                                         if (angle >= wpLookDirection)
                                         {
                                             currentCycle++;
-                                            turnState = 0;
+                                            turnState = -1;
                                         }
                                     }
-                                    control.TurnToAngle(angle);
                                 }
                                 else
                                 {
+                                    angle = wpLookDirection;
                                     currentCycle = 1;
                                     doMode = 3;
                                 }
                             }
                             else
                             {
+                                angle = wpLookDirection;
                                 doMode = 3;
                             }
                             break;
                         }
                         case 3:  //  post-wait
                         {
+                            currentWait += Time.deltaTime;
                             if (currentWait >= wpTimeAfter)
                             {
+                                angle = wpLookDirection;
                                 currentWait = 0;
                                 doMode = 4;
                             }
-                            currentWait += Time.deltaTime;
                             break;
                         }
                         case 4:  //  next
@@ -137,7 +158,6 @@ namespace Coalition
                             {
                                 i = 0;
                             }
-
                             doMode = 0;
                             break;
                         }
@@ -150,8 +170,32 @@ namespace Coalition
                 else if (!shouldRotate)
                 {
                     control.Move(2 * Convert.ToInt32(transform.position.x < waypoints[i].transform.position.x) - 1, 2 * Convert.ToInt32(transform.position.y < waypoints[i].transform.position.y) - 1);
+                    angle = control.GetFacingAngle();
                 }
             }
+        }
+
+        void FixedUpdate()
+        {
+            TurnCharacter();
+            TurnVisionCone();
+        }
+
+        void TurnCharacter()
+        {
+            control.TurnToAngle(angle);
+        }
+
+        void TurnVisionCone()
+        {
+            sightPoints = visionCone.points;
+            sightPoints[0].x = 0;
+            sightPoints[0].y = 0;
+            sightPoints[1].x = sightDistance * Mathf.Cos((angle + sightAngle / 2) * Mathf.Deg2Rad);
+            sightPoints[1].y = sightDistance * Mathf.Sin((angle + sightAngle / 2) * Mathf.Deg2Rad) / 2;
+            sightPoints[2].x = sightDistance * Mathf.Cos((angle - sightAngle / 2) * Mathf.Deg2Rad);
+            sightPoints[2].y = sightDistance * Mathf.Sin((angle - sightAngle / 2) * Mathf.Deg2Rad) / 2;
+            visionCone.points = sightPoints;
         }
     }
 }

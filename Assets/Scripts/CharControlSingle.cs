@@ -25,6 +25,7 @@ namespace Coalition
         #pragma warning restore CS0649
         
         bool canTurn = true;
+        public float facingAngle = 0;
         int initiative = 0;
         SpriteRenderer playerSprite, haloSprite;
         Vector2 moveHere, isoCoords, closeCoords;
@@ -83,6 +84,11 @@ namespace Coalition
             return canTurn;
         }
 
+        public float GetFacingAngle()
+        {
+            return facingAngle;
+        }
+
         public Vector2 GetIsoCoords()
         {
             return isoCoords;
@@ -97,7 +103,8 @@ namespace Coalition
         {
             if (canTurn)
             {
-                playerSprite.sprite = images[GetSpriteIndex(AngleToOther(x, y, relative))];
+                facingAngle = AngleToOther(x, y, relative);
+                playerSprite.sprite = images[GetSpriteIndex(facingAngle)];
             }
         }
 
@@ -105,7 +112,8 @@ namespace Coalition
         {
             if (canTurn)
             {
-                playerSprite.sprite = images[GetSpriteIndex(degrees)];
+                facingAngle = degrees;
+                playerSprite.sprite = images[GetSpriteIndex(facingAngle)];
             }
         }
 
@@ -166,7 +174,8 @@ namespace Coalition
                 haloSprite = transform.Find("Halo").GetComponent<SpriteRenderer>();
             }
 
-            playerSprite.sprite = images[GetSpriteIndex(startFacingAngle)];
+            facingAngle = startFacingAngle;
+            playerSprite.sprite = images[GetSpriteIndex(facingAngle)];
 
             G.CartToNearestIso(transform.position.x, transform.position.y, ref isoCoords);
             G.IsoToCart(isoCoords.x, isoCoords.y, ref closeCoords);
