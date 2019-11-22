@@ -25,7 +25,7 @@ namespace Coalition
         #pragma warning restore CS0649
         
         bool canTurn = true;
-        public float facingAngle = 0;
+        float facingAngle = 0;
         int initiative = 0;
         SpriteRenderer playerSprite, haloSprite;
         Vector2 moveHere, isoCoords, closeCoords;

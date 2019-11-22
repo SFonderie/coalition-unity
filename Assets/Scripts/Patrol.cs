@@ -20,7 +20,7 @@ namespace Coalition
         float moveSpeed = 0;
         int doMode = 0;
         Waypoint waypoint;
-        bool shouldRotate = false;
+        //bool shouldRotate = false;
         float angle;
         float isoAngle;
         Vector2 facingDirection;
@@ -81,6 +81,8 @@ namespace Coalition
                                 if (wpLookMode != G.WaypointLookMode.none)
                                 {
                                     angle = wpLookDirection;
+                                    TurnCharacter();
+                                    TurnVisionCone();
                                 }
 
                                 turnState = 0;
@@ -96,31 +98,57 @@ namespace Coalition
                             {
                                 if (currentCycle <= wpLookCycles)
                                 {
-                                    if (turnState == 0)
+                                    switch (turnState)
                                     {
-                                        angle += wpLookSpeed * Time.deltaTime;
-                                        if (angle >= wpLookDirection + (wpLookRange / 2))
+                                        case 0:
                                         {
-                                            turnState = 1;
+                                            angle += wpLookSpeed * Time.deltaTime;
+                                            if (angle >= wpLookDirection + (wpLookRange / 2))
+                                            {
+                                                turnState = 1;
+                                            }
+                                            break;
                                         }
+                                        case 1:
+                                        {
+                                            angle -= wpLookSpeed * Time.deltaTime;
+                                            if (angle <=  wpLookDirection - (wpLookRange / 2))
+                                            {
+                                                turnState = 2;
+                                            }
+                                            break;
+                                        }
+                                        case 2:
+                                        {
+                                            angle += wpLookSpeed * Time.deltaTime;
+                                            if (angle >= wpLookDirection)
+                                            {
+                                                currentCycle++;
+                                                turnState = 0;
+                                            }
+                                            break;
+                                        }
+                                        default:
+                                        {
+                                            turnState = 0;
+                                            break;
+                                        }
+                                    }
+
+                                    TurnCharacter();
+                                    TurnVisionCone();
+                                    /*if (turnState == 0)
+                                    {
+
                                     }
                                     else if (turnState == 1)
                                     {
-                                        angle -= wpLookSpeed * Time.deltaTime;
-                                        if (angle <=  wpLookDirection - (wpLookRange / 2))
-                                        {
-                                            turnState = 2;
-                                        }
+
                                     }
                                     else if (turnState == 2)
                                     {
-                                        angle += wpLookSpeed * Time.deltaTime;
-                                        if (angle >= wpLookDirection)
-                                        {
-                                            currentCycle++;
-                                            turnState = -1;
-                                        }
-                                    }
+
+                                    }*/
                                 }
                                 else
                                 {
@@ -167,18 +195,20 @@ namespace Coalition
                         }
                     }
                 }
-                else if (!shouldRotate)
+                else/* if (!shouldRotate)*/
                 {
                     control.Move(2 * Convert.ToInt32(transform.position.x < waypoints[i].transform.position.x) - 1, 2 * Convert.ToInt32(transform.position.y < waypoints[i].transform.position.y) - 1);
                     angle = control.GetFacingAngle();
+                    TurnCharacter();
+                    TurnVisionCone();
                 }
             }
         }
 
         void FixedUpdate()
         {
-            TurnCharacter();
-            TurnVisionCone();
+            //TurnCharacter();
+            //TurnVisionCone();
         }
 
         void TurnCharacter()

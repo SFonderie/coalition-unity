@@ -98,5 +98,5 @@ MonoBehaviour:
   waitTimeAfter: 0
   lookDirection: 0
   lookRange: 0
-  lookSpeed: 25
+  lookSpeed: 50
   lookCycles: 1
