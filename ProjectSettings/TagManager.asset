@@ -14,11 +14,11 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - MovementHalo
+  - Characters
+  - Floor
+  - Scenery
+  - VisionCone
   - 
   - 
   - 
@@ -41,4 +41,22 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Floor
+    uniqueID: 2344433693
+    locked: 0
+  - name: Entity
+    uniqueID: 1822142559
+    locked: 0
+  - name: Walls (upper)
+    uniqueID: 2996011355
+    locked: 0
+  - name: Scenery
+    uniqueID: 2329129545
+    locked: 0
+  - name: Walls (lower)
+    uniqueID: 777315569
+    locked: 0
+  - name: GUI
+    uniqueID: 4118698453
     locked: 0
