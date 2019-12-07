@@ -17,6 +17,12 @@ namespace Coalition
         CharControlOverlord playerScript;
         int timesDone = 0;
 
+        public void Activate()
+        {
+            timesDone++;
+            playerScript.StartCombat(ref enemies);
+        }
+
         // Start is called before the first frame update
         void Start()
         {
@@ -33,8 +39,7 @@ namespace Coalition
         {
             if (isActive && timesDone < doTimes && IsValidCollider(col))
             {
-                timesDone++;
-                playerScript.StartCombat(ref enemies);
+                Activate();
             }
         }
 

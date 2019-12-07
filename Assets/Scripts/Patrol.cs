@@ -20,7 +20,6 @@ namespace Coalition
         float moveSpeed = 0;
         int doMode = 0;
         Waypoint waypoint;
-        //bool shouldRotate = false;
         float angle;
         float isoAngle;
         Vector2 facingDirection;
@@ -137,18 +136,6 @@ namespace Coalition
 
                                     TurnCharacter();
                                     TurnVisionCone();
-                                    /*if (turnState == 0)
-                                    {
-
-                                    }
-                                    else if (turnState == 1)
-                                    {
-
-                                    }
-                                    else if (turnState == 2)
-                                    {
-
-                                    }*/
                                 }
                                 else
                                 {
@@ -195,7 +182,7 @@ namespace Coalition
                         }
                     }
                 }
-                else/* if (!shouldRotate)*/
+                else
                 {
                     control.Move(2 * Convert.ToInt32(transform.position.x < waypoints[i].transform.position.x) - 1, 2 * Convert.ToInt32(transform.position.y < waypoints[i].transform.position.y) - 1);
                     angle = control.GetFacingAngle();
@@ -203,12 +190,6 @@ namespace Coalition
                     TurnVisionCone();
                 }
             }
-        }
-
-        void FixedUpdate()
-        {
-            //TurnCharacter();
-            //TurnVisionCone();
         }
 
         void TurnCharacter()

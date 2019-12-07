@@ -39,11 +39,11 @@ namespace Coalition
 
                 if (Physics2D.Raycast(start, end - start, raycastFilter, hits, distance) == 0)
                 {
-                    Debug.Log(col.transform.name + " is visible");
+                    //Debug.Log(col.transform.name + " is visible");
                 }
                 else
                 {
-                    Debug.Log(hits[0].collider.transform.name + " is blocking the view of " + col.transform.name);
+                    //Debug.Log(hits[0].collider.transform.name + " is blocking the view of " + col.transform.name);
                 }
             }
         }
