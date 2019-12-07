@@ -13,13 +13,13 @@ namespace Coalition
 
         public enum CombatState { none, combat };
 
-        public enum MoveMode { none, click, free };
+        public enum MoveMode { none, click, free, attackTarget, attackArea, healTarget, healArea };
 
-        public enum Faction { neutral, ally, enemy };
+        public enum Faction { none = 42, neutral = 0, ally = 1, enemy = -1 };
 
         public enum WaypointLookMode { none, turn, sweep };
 
-        public enum CombatAction { empty, basicAttack };
+        public enum CombatActionType { empty, move, attackTarget, attackArea, healTarget, healArea };
 
         [Serializable]
         public class DialogueData
@@ -68,6 +68,65 @@ namespace Coalition
             }
         }
 
+        [Serializable]
+        public class CombatAction
+        {
+            #pragma warning disable CS0649
+            [SerializeField]
+            CombatActionType type = CombatActionType.empty;
+            [SerializeField]
+            string name = "CombatAction";
+            [SerializeField]
+            int range = 5;
+            [SerializeField]
+            int targets = 1;
+            [SerializeField]
+            int magnitudeMin = 0;
+            [SerializeField]
+            int magnitudeMax = 0;
+            #pragma warning restore CS0649
+
+            public CombatActionType GetActionType()
+            {
+                return type;
+            }
+
+            public string GetName()
+            {
+                return name;
+            }
+
+            public int GetRange()
+            {
+                return range;
+            }
+
+            public int GetMaxTargets()
+            {
+                return targets;
+            }
+
+            public int GetMagnitudeMin()
+            {
+                return magnitudeMin;
+            }
+
+            public int GetMagnitudeMax()
+            {
+                return magnitudeMax;
+            }
+        }
+
+        public static int RandomInt(int start, int end)
+        {
+            return UnityEngine.Random.Range(start, end);
+        }
+
+        public static float RandomFloat(float start, float end)
+        {
+            return UnityEngine.Random.Range(start, end);
+        }
+
         public static void CartToNearestIso(float cartX, float cartY, ref Vector2 vector)
         {
             vector = new Vector2(Mathf.RoundToInt((cartY / tileHalfSize.y - cartX / tileHalfSize.x) * 0.5f), Mathf.RoundToInt((cartX / tileHalfSize.x + cartY / tileHalfSize.y) * 0.5f));
@@ -96,6 +155,46 @@ namespace Coalition
         public static float IsoAngleScaleY(float degrees)
         {
             return IsoAngleScale(degrees, 1f);
+        }
+        
+        public static void Attack(GameObject attacker, GameObject[] targets, int damageMin, int damageMax)
+        {
+            CharControlSingle attackerScript = attacker.GetComponent<CharControlSingle>();
+
+            foreach (GameObject target in targets)
+            {
+                CharControlSingle targetScript = target.GetComponent<CharControlSingle>();
+
+                if (attackerScript.RollAttack() >= targetScript.RollDefense())
+                {
+                    Debug.Log(attacker.name + " hit " + target.name + " with an attack");
+
+                    int damageDealt = RandomInt(damageMin, damageMax) - targetScript.GetArmor();
+
+                    if (damageDealt < 0)
+                    {
+                        damageDealt = 0;
+                    }
+
+                    Debug.Log(attacker.name + " dealt " + damageDealt + " to " + target.name);
+                }
+                else
+                {
+                    Debug.Log(attacker.name + " missed " + target.name + " with an attack");
+                }
+            }
+        }
+
+        public static void Heal(GameObject caster, GameObject[] subjects, int healMin, int healMax)
+        {
+            foreach (GameObject subject in subjects)
+            {
+                CharControlSingle subjectScript = subject.GetComponent<CharControlSingle>();
+
+                int healingDealt = RandomInt(healMin, healMax);
+
+                Debug.Log(caster.name + " gave " + subject.name + " " + healingDealt + " points of healing");
+            }
         }
     }
 }
