@@ -18,12 +18,14 @@ namespace Coalition
         int playerMoveBackup = -1;
         CameraControl cameraScript;
         GameObject cameraTargetBackup;
+        TriggerDialogue currentTrigger;
 
-        public void LoadDialogueData(ref G.DialogueData[] data)
+        public void LoadDialogueData(ref G.DialogueData[] data, ref TriggerDialogue trigger)
         {
             dialogueStages = new G.DialogueData[data.Length];
             Array.Copy(data, dialogueStages, data.Length);
             currentStage = 0;
+            currentTrigger = trigger;
         }
 
         public void ClearDialogueData()
@@ -102,6 +104,12 @@ namespace Coalition
             dialogueButton.gameObject.SetActive(false);
 
             isEnabled = false;
+
+            if (currentTrigger != null)
+            {
+                currentTrigger.Finish();
+                currentTrigger = null;
+            }
         }
 
         public bool IsEnabled()

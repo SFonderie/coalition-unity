@@ -15,6 +15,14 @@ namespace Coalition
         [SerializeField]
         int initiativeMod = 0;
         [SerializeField]
+        int attackMod = 0;
+        [SerializeField]
+        int damageMod = 0;
+        [SerializeField]
+        int defenseMod = 0;
+        [SerializeField]
+        int armor = 0;
+        [SerializeField]
         G.CombatAction[] combatActions;
         [SerializeField]
         int startFacingAngle = 0;
@@ -25,9 +33,11 @@ namespace Coalition
         #pragma warning restore CS0649
         
         bool canTurn = true;
-        public float facingAngle = 0;
+        float facingAngle = 0;
         int initiative = 0;
-        SpriteRenderer playerSprite, haloSprite;
+        int attack = 0;
+        int defense = 0;
+        SpriteRenderer playerSprite, haloSprite, behindSprite, behindHalo;
         Vector2 moveHere, isoCoords, closeCoords;
         Color[] colorNeutral = new Color[] { new Color(0.5f, 0.5f, 0.5f), new Color(1, 1, 1) }, colorAlly = new Color[] { new Color(0, 0.5f, 0), new Color(0, 1, 0) }, colorEnemy = new Color[] { new Color(0.5f, 0, 0), new Color(1, 0, 0) };
 
@@ -65,13 +75,69 @@ namespace Coalition
 
         public int RollInitiative()
         {
-            initiative = UnityEngine.Random.Range(1, 20) + initiativeMod;
+            initiative = G.RandomInt(1, 20) + initiativeMod;
             return initiative;
         }
 
         public int GetInitiative()
         {
             return initiative;
+        }
+
+        public void SetAttack(int i)
+        {
+            attack = i;
+
+            if (attack < 1)
+            {
+                attack = 1;
+            }
+
+            attack += attackMod;
+        }
+
+        public int RollAttack()
+        {
+            attack = G.RandomInt(1, 20) + attackMod;
+            return attack;
+        }
+
+        public int GetAttack()
+        {
+            return attack;
+        }
+
+        public int GetDamageMod()
+        {
+            return damageMod;
+        }
+
+        public void SetDefense(int i)
+        {
+            defense = i;
+
+            if (defense < 0)
+            {
+                defense = 0;
+            }
+
+            defense += defenseMod;
+        }
+
+        public int RollDefense()
+        {
+            defense = G.RandomInt(1, 20) + defenseMod;
+            return defense;
+        }
+
+        public int GetDefense()
+        {
+            return defense;
+        }
+
+        public int GetArmor()
+        {
+            return armor;
         }
 
         public void AllowTurn(bool allow)
@@ -105,6 +171,7 @@ namespace Coalition
             {
                 facingAngle = AngleToOther(x, y, relative);
                 playerSprite.sprite = images[GetSpriteIndex(facingAngle)];
+                behindSprite.sprite = images[GetSpriteIndex(facingAngle)];
             }
         }
 
@@ -114,6 +181,7 @@ namespace Coalition
             {
                 facingAngle = degrees;
                 playerSprite.sprite = images[GetSpriteIndex(facingAngle)];
+                behindSprite.sprite = images[GetSpriteIndex(facingAngle)];
             }
         }
 
@@ -174,8 +242,19 @@ namespace Coalition
                 haloSprite = transform.Find("Halo").GetComponent<SpriteRenderer>();
             }
 
+            if (transform.Find("BehindWallSprite") != null)
+            {
+                behindSprite = transform.Find("BehindWallSprite").GetComponent<SpriteRenderer>();
+            }
+
+            if (transform.Find("BehindWallHalo") != null)
+            {
+                behindHalo = transform.Find("BehindWallHalo").GetComponent<SpriteRenderer>();
+            }
+
             facingAngle = startFacingAngle;
             playerSprite.sprite = images[GetSpriteIndex(facingAngle)];
+            behindSprite.sprite = images[GetSpriteIndex(facingAngle)];
 
             G.CartToNearestIso(transform.position.x, transform.position.y, ref isoCoords);
             G.IsoToCart(isoCoords.x, isoCoords.y, ref closeCoords);

@@ -13,10 +13,30 @@ namespace Coalition
         int doTimes = 1;
         [SerializeField]
         G.DialogueData[] dialogueStages;
+        [SerializeField]
+        TriggerCombat goToCombat;
         #pragma warning restore CS0649
         CharControlOverlord playerScript;
         DialogueCanvas dialogueScript;
         int timesDone = 0;
+
+        public void Activate()
+        {
+            TriggerDialogue self = gameObject.GetComponent<TriggerDialogue>();
+            timesDone++;
+            //  pass data to the dialogue manager
+            dialogueScript.LoadDialogueData(ref dialogueStages, ref self);
+            //  activate dialogue manager
+            dialogueScript.DisplayMessage();
+        }
+
+        public void Finish()
+        {
+            if (goToCombat != null)
+            {
+                goToCombat.Activate();
+            }
+        }
 
         // Start is called before the first frame update
         void Start()
@@ -35,11 +55,7 @@ namespace Coalition
         {
             if (isActive && timesDone < doTimes && IsValidCollider(col))
             {
-                timesDone++;
-                //  pass data to the dialogue manager
-                dialogueScript.LoadDialogueData(ref dialogueStages);
-                //  activate dialogue manager
-                dialogueScript.DisplayMessage();
+                Activate();
             }
         }
 
