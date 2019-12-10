@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,6 +19,11 @@ public class Patrol : MonoBehaviour
     {        
         m_Controller = GetComponent<Controller>();
         waitTime = sWaitTime = ((m_Controller.turnFloat * 2 )) / m_Controller.m_Speed;
+    }
+
+    internal ContactFilter2D GetRaycastFilter()
+    {
+        throw new NotImplementedException();
     }
 
 
