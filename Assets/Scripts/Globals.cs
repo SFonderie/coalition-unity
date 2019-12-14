@@ -7,6 +7,27 @@ namespace Coalition
 {
     public static class G
     {
+        static bool isPaused = false;
+
+        public static void Pause()
+        {
+            if (Time.timeScale == 1)
+            {
+                Time.timeScale = 0;
+                isPaused = true;
+            }
+            else
+            {
+                Time.timeScale = 1;
+                isPaused = false;
+            }
+        }
+
+        public static bool IsPaused()
+        {
+            return isPaused;
+        }
+
         public static Vector2 tileSize = new Vector2(1, 0.5f);
         public static Vector2 tileHalfSize = new Vector2(0.5f, 0.25f);
         public static Vector2 tileFactor = new Vector2(2, 4);

@@ -17,7 +17,9 @@ namespace Coalition
         [SerializeField]
         Color movementHaloInvalidColor = new Color(0.625f, 0.625f, 0.625f);
         [SerializeField]
-        Sprite targetHalo;
+        Sprite targetHaloValid;
+        [SerializeField]
+        Sprite targetHaloInvalid;
         [SerializeField]
         Color targetHaloAttackColor = Color.red;
         [SerializeField]
@@ -38,7 +40,7 @@ namespace Coalition
         DialogueCanvas dialogueScript;
         Tilemap[] tilemaps;
         int playerIndex = 0, combatRound = 1, combatants, activeCombatant = 0;
-        float combatMoveDistance = 5f;
+        //float combatActionRange = 5f;
         float distanceMoved;
         GameObject playerObj;
         CharControlSingle playerScript;
@@ -56,6 +58,7 @@ namespace Coalition
         G.MoveMode moveMode = G.MoveMode.free;
         G.CombatState combatState = G.CombatState.none;
         G.Faction playerFaction = G.Faction.neutral;
+        G.CombatAction currentCombatAction;
 
         public G.MoveMode GetMoveMode()
         {
@@ -68,15 +71,15 @@ namespace Coalition
 
             if (mode == G.MoveMode.none || mode == G.MoveMode.click || mode == G.MoveMode.free)
             {
-                mouseHalo.sprite = movementHalo;
-                mouseHaloBehindWalls.sprite = movementHalo;
+                //mouseHalo.sprite = movementHalo;
+                //mouseHaloBehindWalls.sprite = movementHalo;
                 mouseHaloBase = movementHaloValidColor;
                 mouseHaloInvalid = movementHaloInvalidColor;
             }
             else
             {
-                mouseHalo.sprite = targetHalo;
-                mouseHaloBehindWalls.sprite = targetHalo;
+                //mouseHalo.sprite = targetHaloValid;
+                //mouseHaloBehindWalls.sprite = targetHaloValid;
 
                 if (mode == G.MoveMode.attackTarget || mode == G.MoveMode.attackArea)
                 {
@@ -137,17 +140,62 @@ namespace Coalition
             playerHandle = playerObj.GetComponent<Rigidbody2D>();
             playerHandle.constraints = RigidbodyConstraints2D.FreezeRotation;  //  make new player movable
             
-            foreach (G.CombatAction action in playerScript.GetCombatActions())
+            /*foreach (G.CombatAction action in playerScript.GetCombatActions())
             {
                 if (action.GetActionType() == G.CombatActionType.move)
                 {
-                    combatMoveDistance = action.GetRange();
+                    LoadCombatAction(action);
+                    break;
                 }
-            }
+            }*/
 
             distanceMoved = 0;
 
             Camera.main.GetComponent<CameraControl>().SetTarget(playerObj);
+        }
+
+        public void LoadCombatAction(G.CombatAction action)
+        {
+            currentCombatAction = action;
+
+            switch (currentCombatAction.GetActionType())
+            {
+                case (G.CombatActionType.empty):
+                {
+                    SetMoveMode(G.MoveMode.free);
+                    break;
+                }
+                case (G.CombatActionType.move):
+                {
+                    SetMoveMode(G.MoveMode.click);
+                    break;
+                }
+                case (G.CombatActionType.attackTarget):
+                {
+                    SetMoveMode(G.MoveMode.attackTarget);
+                    break;
+                }
+                case (G.CombatActionType.attackArea):
+                {
+                    SetMoveMode(G.MoveMode.attackArea);
+                    break;
+                }
+                case (G.CombatActionType.healTarget):
+                {
+                    SetMoveMode(G.MoveMode.healTarget);
+                    break;
+                }
+                case (G.CombatActionType.healArea):
+                {
+                    SetMoveMode(G.MoveMode.healArea);
+                    break;
+                }
+                default:
+                {
+                    SetMoveMode(G.MoveMode.free);
+                    break;
+                }
+            }
         }
 
         public GameObject GetPlayer()
@@ -220,6 +268,11 @@ namespace Coalition
         // Update is called once per frame
         void Update()
         {
+            if (Input.GetButtonDown("Cancel"))
+            {
+                G.Pause();
+            }
+
             switch (combatState)
             {
                 case G.CombatState.none:
@@ -292,11 +345,13 @@ namespace Coalition
                 mouseHaloBehindWalls.enabled = mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Floor"));
             }
 
-
             if (moveMode == G.MoveMode.click)
             {
+                mouseHalo.sprite = movementHalo;
+                mouseHaloBehindWalls.sprite = movementHalo;
+
                 //  set the halo brightness and actually allow movement if the spot is valid
-                if (mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Floor")) && !mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Scenery")) && !mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Characters")) && Vector2.Distance(playerScript.GetIsoCoords(), mouseIso) <= combatMoveDistance - distanceMoved && distanceMoved < combatMoveDistance)
+                if (mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Floor")) && !mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Scenery")) && !mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Characters")) && Vector2.Distance(playerScript.GetIsoCoords(), mouseIso) <= currentCombatAction.GetRange() - distanceMoved && distanceMoved < currentCombatAction.GetRange())
                 {
                     mouseHalo.color = mouseHaloBase;
                     mouseHaloBehindWalls.color = mouseHaloBase;
@@ -321,66 +376,53 @@ namespace Coalition
                     playerScript.TurnToward(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
                 }
             }
-            else if (moveMode == G.MoveMode.attackTarget || moveMode == G.MoveMode.attackArea)
+            else if (moveMode != G.MoveMode.none)
             {
+                mouseHalo.sprite = targetHaloInvalid;
+                mouseHaloBehindWalls.sprite = targetHaloInvalid;
+
                 if (mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Floor")) && !mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Scenery")))
                 {
-                    switch ((int) mouseScript.SearchForAnyFaction() * (int) playerScript.GetFaction())
+                    if (mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Characters")))
                     {
-                        case 0:  //  neutral
-                        {
-                            mouseHalo.color = mouseHaloBase;
-                            mouseHaloBehindWalls.color = mouseHaloBase;
-                            break;
-                        }
-                        case 1:  //  same faction
-                        {
-                            mouseHalo.color = mouseHaloInvalid;
-                            mouseHaloBehindWalls.color = mouseHaloInvalid;
-                            break;
-                        }
-                        case -1:  //  opposing faction
-                        {
-                            mouseHalo.color = mouseHaloBase;
-                            mouseHaloBehindWalls.color = mouseHaloBase;
-                            break;
-                        }
-                        default:
-                        {
-                            mouseHalo.color = mouseHaloInvalid;
-                            mouseHaloBehindWalls.color = mouseHaloInvalid;
-                            break;
-                        }
+                        mouseHalo.sprite = targetHaloValid;
+                        mouseHaloBehindWalls.sprite = targetHaloValid;
                     }
-                }
-            }
-            else if (moveMode == G.MoveMode.healTarget || moveMode == G.MoveMode.healArea)
-            {
-                switch ((int) mouseScript.SearchForAnyFaction() * (int) playerScript.GetFaction())
-                {
-                    case 0:  //  neutral
-                    {
-                        mouseHalo.color = mouseHaloBase;
-                        mouseHaloBehindWalls.color = mouseHaloBase;
-                        break;
-                    }
-                    case 1:  //  same faction
-                    {
-                        mouseHalo.color = mouseHaloBase;
-                        mouseHaloBehindWalls.color = mouseHaloBase;
-                        break;
-                    }
-                    case -1:  //  opposing faction
+
+                    if (Vector2.Distance(playerScript.GetIsoCoords(), mouseIso) > currentCombatAction.GetRange())  //  aiming at something out of range
                     {
                         mouseHalo.color = mouseHaloInvalid;
                         mouseHaloBehindWalls.color = mouseHaloInvalid;
-                        break;
                     }
-                    default:
+                    else  //  aiming at something in range
                     {
-                        mouseHalo.color = mouseHaloInvalid;
-                        mouseHaloBehindWalls.color = mouseHaloInvalid;
-                        break;
+                        switch ((int) mouseScript.SearchForAnyFaction() * (int) playerScript.GetFaction() * ((moveMode == G.MoveMode.attackTarget || moveMode == G.MoveMode.attackArea) ? 1 : -1))
+                        {
+                            case 0:  //  neutral
+                            {
+                                mouseHalo.color = mouseHaloBase;
+                                mouseHaloBehindWalls.color = mouseHaloBase;
+                                break;
+                            }
+                            case 1:  //  same faction
+                            {
+                                mouseHalo.color = mouseHaloInvalid;
+                                mouseHaloBehindWalls.color = mouseHaloInvalid;
+                                break;
+                            }
+                            case -1:  //  opposing faction
+                            {
+                                mouseHalo.color = mouseHaloBase;
+                                mouseHaloBehindWalls.color = mouseHaloBase;
+                                break;
+                            }
+                            default:
+                            {
+                                mouseHalo.color = mouseHaloInvalid;
+                                mouseHaloBehindWalls.color = mouseHaloInvalid;
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -443,16 +485,18 @@ namespace Coalition
 
         void AlignCombat()
         {
+            SetMoveMode(G.MoveMode.none);
+                
             if (playerFaction == G.Faction.ally)
             {
                 //Debug.Log("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + "    (space = take turn    enter = end combat)");
-                SetMoveMode(G.MoveMode.click);
+                //SetMoveMode(G.MoveMode.click);
                 actionScript.ShowCombatActions(playerScript.GetCombatActions());
             }
             else
             {
                 //Debug.Log("Combat round " + combatRound + ": " + initiativeList[activeCombatant].name + " is taking their turn");
-                SetMoveMode(G.MoveMode.none);
+                //SetMoveMode(G.MoveMode.none);
                 actionScript.HideCombatActions();
             }
         }
