@@ -8950,6 +8950,11 @@ PrefabInstance:
       propertyPath: raycastFilter.useLayerMask
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4306460191580589623, guid: 04c89d1f573ae4a42bcb4cdec7650018,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7259633036088358589, guid: 04c89d1f573ae4a42bcb4cdec7650018,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
