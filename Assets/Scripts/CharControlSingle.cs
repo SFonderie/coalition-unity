@@ -23,6 +23,12 @@ namespace Coalition
         [SerializeField]
         int armor = 0;
         [SerializeField]
+        int armorMax = 10;
+        [SerializeField]
+        int health = 100;
+        [SerializeField]
+        int healthMax = 100;
+        [SerializeField]
         G.CombatAction[] combatActions;
         [SerializeField]
         int startFacingAngle = 0;
@@ -138,6 +144,50 @@ namespace Coalition
         public int GetArmor()
         {
             return armor;
+        }
+
+        public int GetHealth()
+        {
+            return health;
+        }
+
+        public void Damage(int damage)
+        {
+            if (damage <= armor)
+            {
+                armor -= damage;
+            }
+            else
+            {
+                armor = 0;
+                health -= damage - armor;
+
+                if (health <= 0)
+                {
+                    health = 0;
+                    //  make the character die
+                }
+            }
+        }
+
+        public void Heal(int healing)
+        {
+            health += healing;
+
+            if (health > healthMax)
+            {
+                health = healthMax;
+            }
+        }
+
+        public void Fortify(int buff)
+        {
+            armor += buff;
+
+            if (armor > armorMax)
+            {
+                armor = armorMax;
+            }
         }
 
         public void AllowTurn(bool allow)

@@ -1226,7 +1226,7 @@ TilemapRenderer:
   m_MaxChunkCount: 16
   m_MaxFrameAge: 16
   m_SortOrder: 3
-  m_Mode: 0
+  m_Mode: 1
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
 --- !u!1839735485 &437731967
@@ -1749,7 +1749,7 @@ TilemapRenderer:
   m_MaxChunkCount: 16
   m_MaxFrameAge: 16
   m_SortOrder: 3
-  m_Mode: 0
+  m_Mode: 1
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
 --- !u!1839735485 &642555222
@@ -3083,7 +3083,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -176268843
   m_SortingLayer: 6
-  m_SortingOrder: -2
+  m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 96645ec63f6854c43aefbe7707d847d1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -3173,7 +3173,7 @@ TilemapRenderer:
   m_MaxChunkCount: 16
   m_MaxFrameAge: 16
   m_SortOrder: 3
-  m_Mode: 0
+  m_Mode: 1
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
 --- !u!1839735485 &1529461837
@@ -6604,7 +6604,8 @@ MonoBehaviour:
   movementHalo: {fileID: 21300000, guid: c00066a488a041747996cb9fa867d4e7, type: 3}
   movementHaloValidColor: {r: 1, g: 1, b: 1, a: 1}
   movementHaloInvalidColor: {r: 0.625, g: 0.625, b: 0.625, a: 1}
-  targetHalo: {fileID: 21300000, guid: 2a4496a6a2b8e0b4087634dcf808c03f, type: 3}
+  targetHaloValid: {fileID: 21300000, guid: 2a4496a6a2b8e0b4087634dcf808c03f, type: 3}
+  targetHaloInvalid: {fileID: 21300000, guid: 80a325ce477bbdd49a374f46483327e1, type: 3}
   targetHaloAttackColor: {r: 1, g: 0, b: 0, a: 1}
   targetHaloHealColor: {r: 0, g: 1, b: 0, a: 1}
   targetHaloInvalidColor: {r: 0.625, g: 0.625, b: 0.625, a: 1}
@@ -7375,7 +7376,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -176268843
   m_SortingLayer: 6
-  m_SortingOrder: -1
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 05d29fc20d2cbe440995496d7d5af732, type: 3}
   m_Color: {r: 0.25, g: 0.25, b: 0.25, a: 1}
   m_FlipX: 0
@@ -7488,7 +7489,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: -176268843
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_TargetDisplay: 0
 --- !u!114 &1736954480
 MonoBehaviour:
@@ -8224,7 +8225,7 @@ TilemapRenderer:
   m_MaxChunkCount: 16
   m_MaxFrameAge: 16
   m_SortOrder: 3
-  m_Mode: 0
+  m_Mode: 1
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
 --- !u!1839735485 &2037864133

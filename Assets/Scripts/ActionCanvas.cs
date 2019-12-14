@@ -13,11 +13,12 @@ namespace Coalition
         Transform buttonGroup;
         List<Button> buttons = new List<Button>();
         #pragma warning restore CS0649
-        G.CombatAction[] combatActions = new G.CombatAction[0];
+        G.CombatAction[] combatActions;
 
         public void ShowCombatActions(G.CombatAction[] activeCombatActions)
         {
-            combatActions = activeCombatActions;
+            combatActions = new G.CombatAction[activeCombatActions.Length];
+            Array.Copy(activeCombatActions, combatActions, activeCombatActions.Length);
 
             for (int i = 0; i < combatActions.Length && i < buttons.Count; i++)
             {
@@ -34,7 +35,7 @@ namespace Coalition
                 SetButtonText(i, "Button");
             }
 
-            Array.Clear(combatActions, 0, combatActions.Length);
+            combatActions = new G.CombatAction[0];
         }
 
         string GetButtonText(Button button)
@@ -93,44 +94,7 @@ namespace Coalition
 
             if (currentAction != null)
             {
-                switch (currentAction.GetActionType())
-                {
-                    case (G.CombatActionType.empty):
-                    {
-                        playerScript.SetMoveMode(G.MoveMode.free);
-                        break;
-                    }
-                    case (G.CombatActionType.move):
-                    {
-                        playerScript.SetMoveMode(G.MoveMode.click);
-                        break;
-                    }
-                    case (G.CombatActionType.attackTarget):
-                    {
-                        playerScript.SetMoveMode(G.MoveMode.attackTarget);
-                        break;
-                    }
-                    case (G.CombatActionType.attackArea):
-                    {
-                        playerScript.SetMoveMode(G.MoveMode.attackArea);
-                        break;
-                    }
-                    case (G.CombatActionType.healTarget):
-                    {
-                        playerScript.SetMoveMode(G.MoveMode.healTarget);
-                        break;
-                    }
-                    case (G.CombatActionType.healArea):
-                    {
-                        playerScript.SetMoveMode(G.MoveMode.healArea);
-                        break;
-                    }
-                    default:
-                    {
-                        playerScript.SetMoveMode(G.MoveMode.free);
-                        break;
-                    }
-                }
+                playerScript.LoadCombatAction(currentAction);
             }
         }
     }
