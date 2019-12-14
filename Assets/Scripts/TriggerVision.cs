@@ -18,7 +18,7 @@ namespace Coalition
         void Start()
         {
             patrolScript = transform.parent.GetComponent<Patrol>();
-           // raycastFilter = patrolScript.GetRaycastFilter();
+            raycastFilter = patrolScript.GetRaycastFilter();
             targets = new List<Collider2D>();
         }
 
