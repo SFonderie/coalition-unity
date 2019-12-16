@@ -132,23 +132,27 @@ MonoBehaviour:
   faction: 0
   moveSpeed: 2
   initiativeMod: 0
-  attackMod: 0
-  damageMod: 0
   defenseMod: 0
   armor: 0
-  combatActions:
-  - type: 1
-    name: Move
+  armorMax: 10
+  health: 100
+  healthMax: 100
+  moveAction:
     range: 5
-    targets: 1
+  combatAction1:
+    type: 0
+    name: N/A
+    range: 0
+    accuracy: 0
     magnitudeMin: 0
     magnitudeMax: 0
-  - type: 2
-    name: Shoot
-    range: 5
-    targets: 1
-    magnitudeMin: 1
-    magnitudeMax: 5
+  combatAction2:
+    type: 0
+    name: N/A
+    range: 0
+    accuracy: 0
+    magnitudeMin: 0
+    magnitudeMax: 0
   startFacingAngle: 0
   images:
   - {fileID: 21300000, guid: 8b5e1924f7a67b3469bceb686b75e11b, type: 3}
