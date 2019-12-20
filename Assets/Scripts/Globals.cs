@@ -105,6 +105,8 @@ namespace Coalition
             int magnitudeMin = 0;
             [SerializeField]
             int magnitudeMax = 0;
+            [SerializeField]
+            int uses = 1;
             #pragma warning restore CS0649
 
             public CombatActionType GetActionType()
@@ -135,6 +137,11 @@ namespace Coalition
             public int GetMagnitudeMax()
             {
                 return magnitudeMax;
+            }
+
+            public int GetUses()
+            {
+                return uses;
             }
         }
 

@@ -6,6 +6,9 @@ namespace Coalition
 {
     public class TriggerVision : MonoBehaviour
     {
+        [SerializeField]
+        TriggerCombat combatRef;
+
         Patrol patrolScript;
         ContactFilter2D raycastFilter;
         RaycastHit2D[] hits = new RaycastHit2D[1];
@@ -13,6 +16,7 @@ namespace Coalition
         Vector2 start, end;
         float distance;
         CharControlSingle iSeeYou;
+        bool active = true;
 
         // Start is called before the first frame update
         void Start()
@@ -30,6 +34,11 @@ namespace Coalition
 
         void FixedUpdate()
         {
+            if(!active)
+            {
+                return;
+            }
+
             start = new Vector2(transform.position.x, transform.position.y);
 
             foreach (Collider2D col in targets)
@@ -39,6 +48,11 @@ namespace Coalition
 
                 if (Physics2D.Raycast(start, end - start, raycastFilter, hits, distance) == 0)
                 {
+                    if((int) col.transform.gameObject.GetComponent<CharControlSingle>().GetFaction() * (int) transform.parent.GetComponent<CharControlSingle>().GetFaction() == -1)
+                    {
+                        combatRef.Activate();
+                        active = false;
+                    }
                     //Debug.Log(col.transform.name + " is visible");
                 }
                 else
