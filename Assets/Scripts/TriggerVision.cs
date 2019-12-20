@@ -6,11 +6,12 @@ namespace Coalition
 {
     public class TriggerVision : MonoBehaviour
     {
+        #pragma warning disable CS0649
         [SerializeField]
         TriggerDialogue dialogueRef;
-
         [SerializeField]
         TriggerCombat combatRef;
+        #pragma warning restore CS0649
 
         Patrol patrolScript;
         ContactFilter2D raycastFilter;
