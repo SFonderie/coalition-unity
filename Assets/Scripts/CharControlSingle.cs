@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Coalition
 {
@@ -38,6 +39,8 @@ namespace Coalition
         Sprite[] images;
         [SerializeField]
         Sprite portrait;
+        [SerializeField]
+        RectTransform healthBar;
         #pragma warning restore CS0649
         
         bool canTurn = true;
@@ -135,6 +138,8 @@ namespace Coalition
             health -= damage;
             //Debug.Log(gameObject.name + " took " + damage + " damage");
 
+            healthBar.sizeDelta = new Vector2(80.0f * health / healthMax, healthBar.sizeDelta.y);
+
             if (health <= 0)
             {
                 //Debug.Log(gameObject.name + " died");
@@ -150,6 +155,8 @@ namespace Coalition
             {
                 health = healthMax;
             }
+
+            healthBar.sizeDelta = new Vector2(100.0f * health / healthMax, healthBar.sizeDelta.y);
         }
 
         public void Fortify(int buff)

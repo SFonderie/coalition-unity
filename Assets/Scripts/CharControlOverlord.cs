@@ -43,7 +43,7 @@ namespace Coalition
         ActionCanvas actionScript;
         DialogueCanvas dialogueScript;
         Tilemap[] tilemaps;
-        int playerIndex = 0, combatRound = 1, combatants, activeCombatant = 0;
+        int playerIndex = 0, combatRound = 1, combatants, activeCombatant = 0, shotsLeft = 0;
         float distanceMoved, moveDistanceMin = 1f;
         GameObject playerObj;
         CharControlSingle playerScript;
@@ -188,6 +188,16 @@ namespace Coalition
             SetPlayer(initiativeList[activeCombatant]);
             AlignCombat();
             combatState = G.CombatState.combat;
+
+            foreach (GameObject p in players)
+            {
+                p.transform.Find("HealthCanvas").GetComponent<Canvas>().enabled = true;
+            }
+
+            foreach (GameObject e in enemies)
+            {
+                e.transform.Find("HealthCanvas").GetComponent<Canvas>().enabled = true;
+            }
         }
 
         public void NextTurn()
@@ -385,6 +395,11 @@ namespace Coalition
                 mouseHalo.sprite = targetHaloInvalid;
                 mouseHaloBehindWalls.sprite = targetHaloInvalid;
 
+                if (shotsLeft == 0)
+                {
+                    shotsLeft = currentCombatAction.GetUses();
+                }
+
                 if (mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Floor")) && !mouseHaloCollider.IsTouchingLayers(LayerMask.GetMask("Scenery")))
                 {
                     //Debug.Log("found floor but not scenery");
@@ -417,7 +432,13 @@ namespace Coalition
                                     actionScript.SetListeningPerm(1, false, false);
                                     actionScript.SetListeningPerm(2, false);
                                     G.UseCombatAction(playerScript, mouseScript.SearchForCharOfFaction(G.Faction.neutral).GetComponent<CharControlSingle>(), currentCombatAction);
-                                    CancelAction();
+
+                                    shotsLeft--;
+
+                                    if (shotsLeft == 0)
+                                    {
+                                        CancelAction();
+                                    }
                                 }
 
                                 break;
@@ -440,7 +461,13 @@ namespace Coalition
                                     actionScript.SetListeningPerm(1, false, false);
                                     actionScript.SetListeningPerm(2, false);
                                     G.UseCombatAction(playerScript, mouseScript.SearchForCharOfFaction((G.Faction) (((int) playerFaction) * -1)).GetComponent<CharControlSingle>(), currentCombatAction);
-                                    CancelAction();
+
+                                    shotsLeft--;
+
+                                    if (shotsLeft == 0)
+                                    {
+                                        CancelAction();
+                                    }
                                 }
 
                                 break;
@@ -463,6 +490,7 @@ namespace Coalition
             SetMoveMode(G.MoveMode.none);
             actionScript.SetToolTip("", false);
             actionScript.SetListeningTemp(true);
+            shotsLeft = 0;
         }
 
         void NextPlayer()
