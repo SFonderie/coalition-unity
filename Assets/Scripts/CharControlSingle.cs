@@ -15,10 +15,6 @@ namespace Coalition
         [SerializeField]
         int initiativeMod = 0;
         [SerializeField]
-        int attackMod = 0;
-        [SerializeField]
-        int damageMod = 0;
-        [SerializeField]
         int defenseMod = 0;
         [SerializeField]
         int armor = 0;
@@ -29,7 +25,13 @@ namespace Coalition
         [SerializeField]
         int healthMax = 100;
         [SerializeField]
-        G.CombatAction[] combatActions;
+        G.MoveAction moveAction;
+        /*[SerializeField]
+        G.CombatAction[] combatActions;*/
+        [SerializeField]
+        G.CombatAction combatAction1;
+        [SerializeField]
+        G.CombatAction combatAction2;
         [SerializeField]
         int startFacingAngle = 0;
         [SerializeField]
@@ -41,7 +43,7 @@ namespace Coalition
         bool canTurn = true;
         float facingAngle = 0;
         int initiative = 0;
-        int attack = 0;
+        //int attack = 0;
         int defense = 0;
         SpriteRenderer playerSprite, haloSprite, behindSprite, behindHalo;
         Vector2 moveHere, isoCoords, closeCoords;
@@ -57,9 +59,19 @@ namespace Coalition
             return faction;
         }
 
-        public G.CombatAction[] GetCombatActions()
+        public float GetMoveActionRange()
         {
-            return combatActions;
+            return moveAction.GetRange();
+        }
+
+        public G.CombatAction GetCombatAction1()
+        {
+            return combatAction1;
+        }
+
+        public G.CombatAction GetCombatAction2()
+        {
+            return combatAction2;
         }
 
         public Sprite GetPortrait()
@@ -90,46 +102,6 @@ namespace Coalition
             return initiative;
         }
 
-        public void SetAttack(int i)
-        {
-            attack = i;
-
-            if (attack < 1)
-            {
-                attack = 1;
-            }
-
-            attack += attackMod;
-        }
-
-        public int RollAttack()
-        {
-            attack = G.RandomInt(1, 20) + attackMod;
-            return attack;
-        }
-
-        public int GetAttack()
-        {
-            return attack;
-        }
-
-        public int GetDamageMod()
-        {
-            return damageMod;
-        }
-
-        public void SetDefense(int i)
-        {
-            defense = i;
-
-            if (defense < 0)
-            {
-                defense = 0;
-            }
-
-            defense += defenseMod;
-        }
-
         public int RollDefense()
         {
             defense = G.RandomInt(1, 20) + defenseMod;
@@ -153,20 +125,20 @@ namespace Coalition
 
         public void Damage(int damage)
         {
-            if (damage <= armor)
-            {
-                armor -= damage;
-            }
-            else
-            {
-                armor = 0;
-                health -= damage - armor;
+            damage -= armor;
 
-                if (health <= 0)
-                {
-                    health = 0;
-                    //  make the character die
-                }
+            if (damage < 1)
+            {
+                damage = 1;
+            }
+
+            health -= damage;
+            //Debug.Log(gameObject.name + " took " + damage + " damage");
+
+            if (health <= 0)
+            {
+                //Debug.Log(gameObject.name + " died");
+                Die();
             }
         }
 
@@ -190,7 +162,12 @@ namespace Coalition
             }
         }
 
-        public void AllowTurn(bool allow)
+        public bool IsAlive()
+        {
+            return health > 0;
+        }
+
+        public void AllowTurn(bool allow = true)
         {
             canTurn = allow;
         }
@@ -315,6 +292,11 @@ namespace Coalition
         void Update()
         {
 
+        }
+
+        void Die()
+        {
+            Destroy(gameObject);
         }
 
         float AngleToOther(float x, float y, bool relative = true)

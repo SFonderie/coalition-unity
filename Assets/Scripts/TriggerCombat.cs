@@ -12,7 +12,8 @@ namespace Coalition
         [SerializeField]
         int doTimes = 1;
         [SerializeField]
-        GameObject[] enemies;
+        //GameObject[] enemies;
+        List<GameObject> enemies;
         #pragma warning restore CS0649
         CharControlOverlord playerScript;
         int timesDone = 0;
@@ -20,7 +21,8 @@ namespace Coalition
         public void Activate()
         {
             timesDone++;
-            playerScript.StartCombat(ref enemies);
+            //playerScript.StartCombat(ref enemies);
+            playerScript.StartCombat(enemies);
         }
 
         // Start is called before the first frame update

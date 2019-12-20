@@ -14,6 +14,12 @@ namespace Coalition
         float waypointProximity = 0.1f;
         [SerializeField]
         Transform[] waypoints;
+        [SerializeField]
+        float sightDistance = 5f;
+        [SerializeField]
+        float sightAngle = 30f;
+        [SerializeField]
+        float navigationThreshold = 0.01f;
         #pragma warning restore CS0649
         CharControlSingle control;
         PolygonCollider2D visionCone;
@@ -28,11 +34,8 @@ namespace Coalition
         float wpTimeBefore, wpTimeAfter, wpLookDirection, wpLookRange, wpLookSpeed, currentWait = 0;
         int wpLookCycles, currentCycle;
         RaycastHit2D[] raycastHits;
-        [SerializeField]
-        float sightDistance = 5f;
-        [SerializeField]
-        float sightAngle = 30f;
         Vector2[] sightPoints;
+        int shouldMoveX, shouldMoveY;
 
         public ContactFilter2D GetRaycastFilter()
         {
@@ -184,7 +187,26 @@ namespace Coalition
                 }
                 else
                 {
-                    control.Move(2 * Convert.ToInt32(transform.position.x < waypoints[i].transform.position.x) - 1, 2 * Convert.ToInt32(transform.position.y < waypoints[i].transform.position.y) - 1);
+                    //control.Move(2 * Convert.ToInt32(transform.position.x < waypoints[i].transform.position.x) - 1, 2 * Convert.ToInt32(transform.position.y < waypoints[i].transform.position.y) - 1);
+                    shouldMoveX = 0;
+                    if (transform.position.x < waypoints[i].transform.position.x - navigationThreshold)
+                    {
+                        shouldMoveX = 1;
+                    }
+                    else if (transform.position.x > waypoints[i].transform.position.x + navigationThreshold)
+                    {
+                        shouldMoveX = -1;
+                    }
+                    shouldMoveY = 0;
+                    if (transform.position.y < waypoints[i].transform.position.y - navigationThreshold)
+                    {
+                        shouldMoveY = 1;
+                    }
+                    else if (transform.position.y > waypoints[i].transform.position.y + navigationThreshold)
+                    {
+                        shouldMoveY = -1;
+                    }
+                    control.Move(shouldMoveX, shouldMoveY);
                     angle = control.GetFacingAngle();
                     TurnCharacter();
                     TurnVisionCone();

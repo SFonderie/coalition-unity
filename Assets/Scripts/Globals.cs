@@ -34,13 +34,13 @@ namespace Coalition
 
         public enum CombatState { none, combat };
 
-        public enum MoveMode { none, click, free, attackTarget, attackArea, healTarget, healArea };
+        public enum MoveMode { none, click, free, attack, heal };
 
         public enum Faction { none = 42, neutral = 0, ally = 1, enemy = -1 };
 
         public enum WaypointLookMode { none, turn, sweep };
 
-        public enum CombatActionType { empty, move, attackTarget, attackArea, healTarget, healArea };
+        public enum CombatActionType { none, attackTarget, healTarget, attackArea, healArea };
 
         [Serializable]
         public class DialogueData
@@ -94,13 +94,13 @@ namespace Coalition
         {
             #pragma warning disable CS0649
             [SerializeField]
-            CombatActionType type = CombatActionType.empty;
+            CombatActionType type;
             [SerializeField]
             string name = "CombatAction";
             [SerializeField]
-            int range = 5;
+            float range = 5f;
             [SerializeField]
-            int targets = 1;
+            int accuracy = 67;
             [SerializeField]
             int magnitudeMin = 0;
             [SerializeField]
@@ -117,14 +117,14 @@ namespace Coalition
                 return name;
             }
 
-            public int GetRange()
+            public float GetRange()
             {
                 return range;
             }
 
-            public int GetMaxTargets()
+            public int GetAccuracy()
             {
-                return targets;
+                return accuracy;
             }
 
             public int GetMagnitudeMin()
@@ -135,6 +135,20 @@ namespace Coalition
             public int GetMagnitudeMax()
             {
                 return magnitudeMax;
+            }
+        }
+
+        [Serializable]
+        public class MoveAction
+        {
+            #pragma warning disable CS0649
+            [SerializeField]
+            float range = 5f;
+            #pragma warning restore CS0649
+
+            public float GetRange()
+            {
+                return range;
             }
         }
 
@@ -177,44 +191,47 @@ namespace Coalition
         {
             return IsoAngleScale(degrees, 1f);
         }
-        
-        public static void Attack(GameObject attacker, GameObject[] targets, int damageMin, int damageMax)
+
+        public static bool LineOfSight(Vector2 start, Vector2 end, ContactFilter2D raycastFilter)
         {
-            CharControlSingle attackerScript = attacker.GetComponent<CharControlSingle>();
+            return !Physics2D.Raycast(start, end - start, Vector2.Distance(start, end), raycastFilter.layerMask);
+            
+            /*RaycastHit2D[] hits = new RaycastHit2D[1];
 
-            foreach (GameObject target in targets)
+            if (Physics2D.Raycast(start, end - start, raycastFilter, hits, Vector2.Distance(start, end)) == 0)
             {
-                CharControlSingle targetScript = target.GetComponent<CharControlSingle>();
+                Debug.Log("line of sight is good");
+                return true;
+            }
+            else
+            {
+                Debug.Log("line of sight is blocked by " + hits[0].collider.gameObject.name);
+                return false;
+            }*/
+        }
+        
+        public static void UseCombatAction(CharControlSingle userScript, CharControlSingle targetScript, CombatAction action)
+        {
+            int magnitude;
 
-                if (attackerScript.RollAttack() >= targetScript.RollDefense())
+            if (action.GetActionType() == CombatActionType.attackTarget)
+            {
+                if (RandomInt(1, 100) <= action.GetAccuracy())
                 {
-                    Debug.Log(attacker.name + " hit " + target.name + " with an attack");
-
-                    int damageDealt = RandomInt(damageMin, damageMax) - targetScript.GetArmor();
-
-                    if (damageDealt < 0)
-                    {
-                        damageDealt = 0;
-                    }
-
-                    Debug.Log(attacker.name + " dealt " + damageDealt + " to " + target.name);
+                    magnitude = RandomInt(action.GetMagnitudeMin(), action.GetMagnitudeMax());
+                    targetScript.Damage(magnitude);
+                    Debug.Log(userScript.gameObject.name + " hit " + targetScript.gameObject.name + " with their attack for " + magnitude + " damage");
                 }
                 else
                 {
-                    Debug.Log(attacker.name + " missed " + target.name + " with an attack");
+                    Debug.Log(userScript.gameObject.name + " missed " + targetScript.gameObject.name + " with their attack");
                 }
             }
-        }
-
-        public static void Heal(GameObject caster, GameObject[] subjects, int healMin, int healMax)
-        {
-            foreach (GameObject subject in subjects)
+            else if (action.GetActionType() == CombatActionType.healTarget)
             {
-                CharControlSingle subjectScript = subject.GetComponent<CharControlSingle>();
-
-                int healingDealt = RandomInt(healMin, healMax);
-
-                Debug.Log(caster.name + " gave " + subject.name + " " + healingDealt + " points of healing");
+                magnitude = RandomInt(action.GetMagnitudeMin(), action.GetMagnitudeMax());
+                targetScript.Heal(magnitude);
+                Debug.Log(userScript.gameObject.name + " healed " + targetScript.gameObject.name + " for " + magnitude + " health");
             }
         }
     }
