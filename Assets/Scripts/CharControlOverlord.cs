@@ -47,6 +47,7 @@ namespace Coalition
         float distanceMoved, moveDistanceMin = 1f;
         GameObject playerObj;
         CharControlSingle playerScript;
+        Patrol patrolScript;
         Rigidbody2D playerHandle;
         List<GameObject> initiativeList;
         bool nonPlayerTurn = false;
@@ -129,6 +130,10 @@ namespace Coalition
                 playerScript.SetHaloActive(false);
                 //  make old player immovable
                 playerHandle.constraints = RigidbodyConstraints2D.FreezeAll;
+                if (patrolScript != null)
+                {
+                    patrolScript.SetBusy(false);
+                }
             }
 
             // get new player
@@ -138,6 +143,12 @@ namespace Coalition
             playerFaction = playerScript.GetFaction();  //  get the new player's faction
             playerHandle = playerObj.GetComponent<Rigidbody2D>();
             playerHandle.constraints = RigidbodyConstraints2D.FreezeRotation;  //  make new player movable
+
+            patrolScript = playerObj.GetComponent<Patrol>();
+            if (patrolScript != null)
+            {
+                patrolScript.SetBusy(true);
+            }
 
             distanceMoved = 0;
             currentMoveRange = playerScript.GetMoveActionRange();
@@ -177,27 +188,35 @@ namespace Coalition
         //public void StartCombat(ref GameObject[] enemyTeam)
         public void StartCombat(List<GameObject> enemyTeam)
         {
-            /*enemies = new GameObject[enemyTeam.Length];
-            for (int i = 0; i < enemyTeam.Length; i++)
-            {
-                enemies[i] = enemyTeam[i];
-            }*/
             enemies = enemyTeam;
-            AllIsoSnap();
-            SortInitiative();
-            SetPlayer(initiativeList[activeCombatant]);
-            AlignCombat();
-            combatState = G.CombatState.combat;
 
             foreach (GameObject p in players)
             {
                 p.transform.Find("HealthCanvas").GetComponent<Canvas>().enabled = true;
+                
+                patrolScript = p.GetComponent<Patrol>();
+                if (patrolScript != null)
+                {
+                    patrolScript.SetShouldPatrol(false);
+                }
             }
 
             foreach (GameObject e in enemies)
             {
                 e.transform.Find("HealthCanvas").GetComponent<Canvas>().enabled = true;
+                
+                patrolScript = e.GetComponent<Patrol>();
+                if (patrolScript != null)
+                {
+                    patrolScript.SetShouldPatrol(false);
+                }
             }
+
+            AllIsoSnap();
+            SortInitiative();
+            SetPlayer(initiativeList[activeCombatant]);
+            AlignCombat();
+            combatState = G.CombatState.combat;
         }
 
         public void NextTurn()
@@ -262,11 +281,21 @@ namespace Coalition
             foreach (GameObject p in players)
             {
                 p.transform.Find("HealthCanvas").GetComponent<Canvas>().enabled = false;
+                
+                if (patrolScript != null)
+                {
+                    patrolScript.SetBusy(false);
+                }
             }
 
             foreach (GameObject e in enemies)
             {
                 e.transform.Find("HealthCanvas").GetComponent<Canvas>().enabled = false;
+                
+                if (patrolScript != null)
+                {
+                    patrolScript.SetBusy(false);
+                }
             }
 
             //enemies = new GameObject[0];
@@ -322,6 +351,7 @@ namespace Coalition
 
                     if (nonPlayerTurn)  //  active combatant takes their turn
                     {
+                        EnemyTurn();
                         NextTurn();
                     }
                     
@@ -495,6 +525,24 @@ namespace Coalition
             }
         }
 
+        void EnemyTurn()
+        {
+            //LoadCombatAction(playerScript.GetCombatAction1());
+
+            CharControlSingle targetScript;
+
+            foreach (GameObject p in players)
+            {
+                targetScript = p.GetComponent<CharControlSingle>();
+
+                if (targetScript != null && Vector2.Distance(playerScript.GetIsoCoords(), targetScript.GetIsoCoords()) <= playerScript.GetCombatAction1().GetRange() && G.LineOfSight(playerScript.GetCloseCoords(), targetScript.GetCloseCoords(), raycastFilter))
+                {
+                    G.UseCombatAction(playerScript, targetScript, playerScript.GetCombatAction1());
+                    break;
+                }
+            }
+        }
+
         void CancelAction()
         {
             SetMoveMode(G.MoveMode.none);
@@ -522,6 +570,12 @@ namespace Coalition
                 if (players[playerIndex] != null)
                 {
                     SetPlayer(players[playerIndex]);
+
+                    foreach (GameObject p in players)
+                    {
+                        p.GetComponent<Patrol>().SetWaypoint(0, playerScript.GetFollowPoint());
+                    }
+
                     break;
                 }
             } while (playerIndex != startIndex);
