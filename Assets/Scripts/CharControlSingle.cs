@@ -157,12 +157,12 @@ namespace Coalition
         {
             health += healing;
 
-            if (health > healthMax)
+            if (health >= healthMax)
             {
                 health = healthMax;
             }
 
-            healthBar.sizeDelta = new Vector2(100.0f * health / healthMax, healthBar.sizeDelta.y);
+            healthBar.sizeDelta = new Vector2(80.0f * health / healthMax, healthBar.sizeDelta.y);
         }
 
         public void Fortify(int buff)

@@ -272,7 +272,6 @@ namespace Coalition
         public void ClearCombat()
         {
             //Debug.Log("End combat: returning control to " + players[playerIndex].name);
-            SetPlayer(players[playerIndex]);
             SetMoveMode(G.MoveMode.free);
             combatRound = 1;
             combatState = G.CombatState.none;
@@ -281,9 +280,11 @@ namespace Coalition
             foreach (GameObject p in players)
             {
                 p.transform.Find("HealthCanvas").GetComponent<Canvas>().enabled = false;
-                
+
+                patrolScript = p.GetComponent<Patrol>();
                 if (patrolScript != null)
                 {
+                    patrolScript.SetShouldPatrol(true);
                     patrolScript.SetBusy(false);
                 }
             }
@@ -291,15 +292,19 @@ namespace Coalition
             foreach (GameObject e in enemies)
             {
                 e.transform.Find("HealthCanvas").GetComponent<Canvas>().enabled = false;
-                
+
+                patrolScript = e.GetComponent<Patrol>();
                 if (patrolScript != null)
                 {
+                    patrolScript.SetShouldPatrol(true);
                     patrolScript.SetBusy(false);
                 }
             }
 
             //enemies = new GameObject[0];
             enemies = null;
+
+            SetPlayer(players[playerIndex]);
         }
 
         // Use this for initialization
@@ -325,7 +330,7 @@ namespace Coalition
         {
             if (Input.GetButtonDown("Cancel"))
             {
-                G.Pause();
+                Application.Quit();
             }
 
             switch (combatState)
@@ -500,7 +505,7 @@ namespace Coalition
                                 {
                                     actionScript.SetListeningPerm(1, false, false);
                                     actionScript.SetListeningPerm(2, false);
-                                    G.UseCombatAction(playerScript, mouseScript.SearchForCharOfFaction((G.Faction) (((int) playerFaction) * -1)).GetComponent<CharControlSingle>(), currentCombatAction);
+                                    G.UseCombatAction(playerScript, mouseScript.SearchForCharOfFaction((G.Faction) (((int) playerFaction) * (moveMode == G.MoveMode.attack ? -1 : 1))).GetComponent<CharControlSingle>(), currentCombatAction);
 
                                     shotsLeft--;
 
