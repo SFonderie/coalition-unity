@@ -259,6 +259,16 @@ namespace Coalition
             combatState = G.CombatState.none;
             actionScript.HideCombatActions();
 
+            foreach (GameObject p in players)
+            {
+                p.transform.Find("HealthCanvas").GetComponent<Canvas>().enabled = false;
+            }
+
+            foreach (GameObject e in enemies)
+            {
+                e.transform.Find("HealthCanvas").GetComponent<Canvas>().enabled = false;
+            }
+
             //enemies = new GameObject[0];
             enemies = null;
         }

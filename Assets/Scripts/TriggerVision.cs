@@ -7,6 +7,9 @@ namespace Coalition
     public class TriggerVision : MonoBehaviour
     {
         [SerializeField]
+        TriggerDialogue dialogueRef;
+
+        [SerializeField]
         TriggerCombat combatRef;
 
         Patrol patrolScript;
@@ -50,8 +53,17 @@ namespace Coalition
                 {
                     if((int) col.transform.gameObject.GetComponent<CharControlSingle>().GetFaction() * (int) transform.parent.GetComponent<CharControlSingle>().GetFaction() == -1)
                     {
-                        combatRef.Activate();
-                        active = false;
+                        if(dialogueRef && active)
+                        {
+                            dialogueRef.Activate();
+                            active = false;
+                        }
+
+                        if(combatRef && active)
+                        {
+                            combatRef.Activate();
+                            active = false;
+                        }
                     }
                     //Debug.Log(col.transform.name + " is visible");
                 }
