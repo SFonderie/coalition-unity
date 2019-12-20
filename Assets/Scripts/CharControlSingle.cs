@@ -51,6 +51,12 @@ namespace Coalition
         SpriteRenderer playerSprite, haloSprite, behindSprite, behindHalo;
         Vector2 moveHere, isoCoords, closeCoords;
         Color[] colorNeutral = new Color[] { new Color(0.5f, 0.5f, 0.5f), new Color(1, 1, 1) }, colorAlly = new Color[] { new Color(0, 0.5f, 0), new Color(0, 1, 0) }, colorEnemy = new Color[] { new Color(0.5f, 0, 0), new Color(1, 0, 0) };
+        Transform followMe;
+
+        public Transform GetFollowPoint()
+        {
+            return followMe;
+        }
 
         public float GetMoveSpeed()
         {
@@ -285,6 +291,8 @@ namespace Coalition
             {
                 behindHalo = transform.Find("BehindWallHalo").GetComponent<SpriteRenderer>();
             }
+
+            followMe = transform.Find("FollowWaypoint");
 
             facingAngle = startFacingAngle;
             playerSprite.sprite = images[GetSpriteIndex(facingAngle)];

@@ -36,10 +36,36 @@ namespace Coalition
         RaycastHit2D[] raycastHits;
         Vector2[] sightPoints;
         int shouldMoveX, shouldMoveY;
+        bool isBusy = false, shouldPatrol = true;
 
         public ContactFilter2D GetRaycastFilter()
         {
             return raycastFilter;
+        }
+
+        public void SetBusy(bool busy)
+        {
+            isBusy = busy;
+        }
+
+        public bool IsBusy()
+        {
+            return isBusy;
+        }
+
+        public void SetShouldPatrol(bool patrol)
+        {
+            shouldPatrol = patrol;
+        }
+
+        public bool GetShouldPatrol()
+        {
+            return shouldPatrol;
+        }
+
+        public void SetWaypoint(int i, Transform t)
+        {
+            waypoints[i] = t;
         }
 
         void Start()
@@ -53,7 +79,7 @@ namespace Coalition
         {
             facingDirection = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
 
-            if (waypoints.Length > 0)
+            if (waypoints.Length > 0 && !isBusy && shouldPatrol)
             {
                 if (Vector2.Distance(transform.position, waypoints[i].position) < waypointProximity)
                 {
